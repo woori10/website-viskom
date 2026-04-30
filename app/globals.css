@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@source "../../component";
+
+@theme {
+  --color-primary: #bc002d;
+  --color-secondary: #ffffff;
+  --color-ternary: #1a1c1c;
+  --color-neutral: #e2e2e2;
+  --color-text-primary: #1a1c1c;
+  --color-text-secondary: #6b7280;
+  --color-text-ternary: #c6c6c7;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --color-primary: #bc002d;
+
+  --color-secondary: #ffffff;
+  --color-ternary: #1a1c1c;
+  --color-neutral: #e2e2e2;
+
+  --color-text-primary: #1a1c1c;
+  --color-text-secondary: #6b7280;
+  --color-text-ternary: #c6c6c7;
+
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-secondary: #0a0a0a;
+    --color-ternary: #1a1a1a;
+
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a1a1aa;
+    --color-text-ternary: #71717a;
   }
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background-color: var(--color-secondary);
+  overflow-x: hidden;
 }

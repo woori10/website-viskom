@@ -7,10 +7,11 @@ type ButtonVariant =
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
+  active?: boolean;
 }
 
 const base =
-  "px-4 py-3 rounded-lg font-medium transition-all duration-200 ease-in-out hover:cursor-pointer";
+  "px-4 py-3 font-medium transition-all duration-200 ease-in-out hover:cursor-pointer";
 
 const variants = {
   primary: `
@@ -41,14 +42,42 @@ const variants = {
   `,
 };
 
+const activeVariants = {
+  primary: variants.primary,
+
+  secondary: `
+    bg-[var(--color-primary)]
+    text-white
+    border-[var(--color-primary)]
+  `,
+
+  inverted: `
+    bg-[var(--color-primary)]
+    text-white
+  `,
+
+  outline: `
+    bg-[var(--color-primary)]
+    text-white
+    border-[var(--color-primary)]
+  `,
+
+  outline1: `
+    bg-[var(--color-primary)]
+    text-white
+    border-[var(--color-primary)]
+  `,
+};
+
 export default function Button({
   variant = "primary",
+  active = false,
   className = "",
   ...props
 }: Readonly<ButtonProps>) {
   return (
     <button
-      className={`${base} ${variants[variant]} ${className}`}
+      className={`${base} ${active ? activeVariants[variant] : variants[variant]} ${className}`}
       {...props}
     />
   );

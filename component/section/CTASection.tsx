@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Button from "../ui/Button";
 import Container from "../ui/Container";
 
@@ -13,13 +14,18 @@ export default function CTASection() {
             Kami mengombinasikan seni visual tradisional dengan teknologi modern
             untuk memudahkan proses belajarmu.
           </p>
-          <div className="flex flex-col md:flex-row max-w-2xl mx-auto w-full mt-8 gap-6 md:gap-4">
-            <Button variant="primary" className="w-full md:flex-1">
-              Mulai Belajar
-            </Button>
-            <Button variant="outline1" className="w-full md:flex-1">
-              Lihat Dictionary
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto w-full mt-8 gap-6 md:gap-4">
+            <Link href="/quiz" className="w-full">
+              <Button variant="primary" className="w-full">
+                Mulai Belajar
+              </Button>
+            </Link>
+
+            <Link href="/dictionary" className="w-full">
+              <Button variant="outline1" className="w-full">
+                Lihat Dictionary
+              </Button>
+            </Link>
           </div>
         </div>
       </Container>

@@ -1,6 +1,7 @@
 import Button from "@/component/ui/Button";
 import Container from "@/component/ui/Container";
 import { Dot } from "lucide-react";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -21,13 +22,17 @@ export default function HeroSection() {
               Kuasai Hiragama dan Katakana melalui pendekatan visual yang
               menenagkan dan interaktif. Mulai dari dasar dengan Sakura Learn
             </p>
-            <div className="flex flex-col md:flex-row w-full mt-8 gap-4">
-              <Button variant="primary" className="w-full md:flex-1">
-                Mulai Belajar
-              </Button>
-              <Button variant="secondary" className="w-full md:flex-1">
-                Lihat Dictionary
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+              <Link href="/quiz" className="w-full">
+                <Button variant="primary" className="w-full">
+                  Mulai Belajar
+                </Button>
+              </Link>
+              <Link href="/dictionary" className="w-full">
+                <Button variant="secondary" className="w-full">
+                  Lihat Dictionary
+                </Button>
+              </Link>
             </div>
           </div>
 

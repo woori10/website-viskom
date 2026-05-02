@@ -7,7 +7,7 @@ export default function DictionarySection() {
       <Container>
         <div className="space-y-8">
           {/* Atas */}
-          <div className="flex justify-center items-center">
+          <div data-aos="fade-up" className="flex justify-center items-center">
             <div className="max-w-2xl w-full space-y-4">
               <h2 className="uppercase text-center text-text-primary text-2xl md:text-3xl font-bold">
                 Mengenal Hiragana dan Katakana
@@ -19,7 +19,11 @@ export default function DictionarySection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            data-aos="fade-right"
+            data-aos-duration="2000"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {/* Kiri */}
             <div className="border border-(--color-ternary) w-full md:col-span-2 p-8">
               <div className="bg-(--color-primary) text-white w-fit">
@@ -57,7 +61,11 @@ export default function DictionarySection() {
           </div>
 
           {/* Bawah */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            data-aos="fade-left"
+            data-aos-duration="2000"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {/* Kiri */}
             <div className="bg-(--color-ternary) w-full md:col-span-1 p-6">
               <div className="bg-(--color-primary) text-white w-fit">

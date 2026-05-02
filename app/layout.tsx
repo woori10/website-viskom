@@ -2,6 +2,7 @@ import BottomNav from "@/component/layout/BottomNav";
 import Footer from "@/component/layout/Footer";
 import Navbar from "@/component/layout/Navbar";
 import TopHeader from "@/component/layout/TopHeader";
+import AOSProvider from "@/providers/AOSProvider";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={plusJakarta.variable}>
       <body className="min-h-screen flex flex-col bg-(--color-secondary) text-(--color-text-primary)">
+        <AOSProvider />
         {/* Desktop Navbar */}
         <div className="hidden md:block">
           <Navbar />

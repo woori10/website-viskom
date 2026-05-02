@@ -6,7 +6,10 @@ export default function CTASection() {
   return (
     <section className="py-16">
       <Container>
-        <div className="bg-(--color-ternary) border-b-8 border-primary py-16 px-8 space-y-8">
+        <div
+          data-aos="zoom-in"
+          className="bg-(--color-ternary) border-b-8 border-primary py-16 px-8 space-y-8"
+        >
           <h1 className="text-(--color-secondary) text-4xl uppercase font-bold text-center">
             siap mulai belajar?
           </h1>

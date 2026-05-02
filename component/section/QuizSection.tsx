@@ -4,7 +4,7 @@ import Container from "../ui/Container";
 export default function QuizSection() {
   return (
     <section className="py-16">
-      <div className="bg-(--color-primary)">
+      <div data-aos="fade-up" className="bg-(--color-primary)">
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 items-center py-16 gap-8 md:gap-16">
             {/* Kiri */}

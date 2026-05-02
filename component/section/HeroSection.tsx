@@ -7,7 +7,10 @@ export default function HeroSection() {
   return (
     <section className="py-24">
       <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+        <div
+          data-aos="fade-up"
+          className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16"
+        >
           {/* KIRI */}
           <div className="flex-1 text-center md:text-left space-y-6">
             <div className="flex justify-center md:justify-start items-center gap-2 border border-primary text-primary w-fit p-2 mx-auto md:mx-0">

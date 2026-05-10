@@ -9,13 +9,8 @@ export default function QuizSection() {
           <div className="grid grid-cols-1 md:grid-cols-2 items-center py-16 gap-8 md:gap-16">
             {/* Kiri */}
             <div className="flex-1 text-center md:text-left space-y-4">
-              <div className="bg-secondary border-ternary m-4">
-                <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Tempore porro enim laudantium inventore obcaecati asperiores
-                  voluptates ratione, similique esse, aliquam sapiente velit
-                  sequi repellat. Vitae nisi natus ipsa beatae voluptate.
-                </p>
+              <div className="border-ternary m-4">
+                <img src="/quiz.jpg" alt="Quiz" className="object-cover" />
               </div>
             </div>
             {/* Kanan */}

@@ -17,7 +17,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <h1 className="text-lg font-bold text-(--color-primary)">
-          Sakura Learn
+          KataHira Learn
         </h1>
 
         {/* Menu */}

@@ -9,7 +9,7 @@ export default function HeroSection() {
       <Container>
         <div
           data-aos="fade-up"
-          className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16"
+          className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 md:gap-24"
         >
           {/* KIRI */}
           <div className="flex-1 text-center md:text-left space-y-6">
@@ -41,9 +41,14 @@ export default function HeroSection() {
 
           {/* KANAN */}
           <div className="flex-1">
-            <div className="h-64 w-full rounded-xl bg-neutral flex items-center justify-center">
+            <img
+              src="/hero.jpg"
+              alt="Japan"
+              className="object-cover rounded-lg"
+            />
+            {/* <div className="h-64 w-full rounded-xl bg-neutral flex items-center justify-center">
               Image / Illustration
-            </div>
+            </div> */}
           </div>
         </div>
       </Container>

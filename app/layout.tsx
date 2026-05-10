@@ -13,7 +13,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Sakura Learn",
+  title: "KataHira Learn",
   description: "Belajar Hiragana dan Katakana",
   icons: {
     icon: "/SakuraLearnIcon.webp",

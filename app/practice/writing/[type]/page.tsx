@@ -6,6 +6,54 @@ import { Huruf, hurufList } from "@/lib/data/huruf";
 import { ArrowLeft, Trash2, Camera, RotateCcw } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import * as tf from "@tensorflow/tfjs";
+
+const HIRAGANA_LABELS = [
+  "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ",
+  "さ", "し", "す", "せ", "そ", "た", "ち", "つ", "て", "と",
+  "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ",
+  "ま", "み", "む", "め", "も", "や", "ゆ", "よ", "ら", "り",
+  "る", "れ", "ろ", "わ", "を", "ん",
+  "が", "ぎ", "ぐ", "げ", "ご", "ざ", "じ", "ず", "ぜ", "ぞ",
+  "だ", "ぢ", "づ", "で", "ど", "ば", "び", "ぶ", "べ", "ぼ",
+  "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"
+];
+
+const KATAKANA_LABELS = [
+  "ア", "イ", "ウ", "エ", "オ",
+  "カ", "キ", "ク", "ケ", "コ",
+  "サ", "シ", "ス", "セ", "ソ",
+  "タ", "チ", "ツ", "テ", "ト",
+  "ナ", "ニ", "ヌ", "ネ", "ノ",
+  "ハ", "ヒ", "フ", "ヘ", "ホ",
+  "マ", "ミ", "ム", "メ", "モ",
+  "ヤ", "ユ", "ヨ",
+  "ラ", "リ", "ル", "レ", "ろ", // Wait, ろ is Hiragana, should be ロ
+  "ワ", "ヲ", "ン",
+  "ガ", "ギ", "グ", "ゲ", "ゴ",
+  "ザ", "ジ", "ズ", "ぜ", "ゾ", // ぜ is Hiragana, should be ゼ
+  "ダ", "ヂ", "ヅ", "デ", "ド",
+  "バ", "ビ", "ブ", "ベ", "ボ",
+  "パ", "ピ", "プ", "ペ", "ポ"
+];
+// Correcting my mental mapping for Katakana labels
+const KATAKANA_LABELS_FIXED = [
+  "ア", "イ", "ウ", "エ", "オ",
+  "カ", "キ", "ク", "ケ", "コ",
+  "サ", "シ", "ス", "セ", "ソ",
+  "タ", "チ", "ツ", "テ", "ト",
+  "ナ", "ニ", "ヌ", "ネ", "ノ",
+  "ハ", "ヒ", "フ", "ヘ", "ホ",
+  "マ", "ミ", "ム", "メ", "モ",
+  "ヤ", "ユ", "ヨ",
+  "ラ", "リ", "ル", "レ", "ロ",
+  "ワ", "ヲ", "ン",
+  "ガ", "ギ", "グ", "ゲ", "ゴ",
+  "ザ", "ジ", "ズ", "ゼ", "ゾ",
+  "ダ", "ヂ", "ヅ", "デ", "ド",
+  "バ", "ビ", "ブ", "ベ", "ボ",
+  "パ", "ピ", "プ", "ペ", "ポ"
+];
 
 // Types for landmarks
 type Point = { x: number; y: number };
@@ -21,7 +69,13 @@ export default function WritingPractice() {
   const [videoReady, setVideoReady] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isWriting, setIsWriting] = useState(false);
-  
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const [model, setModel] = useState<tf.GraphModel | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [modelError, setModelError] = useState<string | null>(null);
+
   const videoRef = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,6 +90,29 @@ export default function WritingPractice() {
     if (filtered.length > 0) {
       const random = filtered[Math.floor(Math.random() * filtered.length)];
       setHuruf(random);
+    }
+  }, [type]);
+
+  // LOAD MODEL
+  useEffect(() => {
+    async function loadModel() {
+      setIsModelLoading(true);
+      setModelError(null);
+      try {
+        const modelUrl = `/models/${type}/model.json`;
+        console.log("Loading model from:", modelUrl);
+        const loadedModel = await tf.loadGraphModel(modelUrl);
+        setModel(loadedModel);
+        console.log("✅ Model loaded successfully");
+      } catch (err) {
+        console.error("❌ Failed to load model:", err);
+        setModelError("Gagal memuat model AI. Pastikan file model tersedia.");
+      } finally {
+        setIsModelLoading(false);
+      }
+    }
+    if (type) {
+      loadModel();
     }
   }, [type]);
 
@@ -62,16 +139,120 @@ export default function WritingPractice() {
     };
   }, []);
 
-  const handleReset = () => {
+  const handleClearCanvas = () => {
     strokesRef.current = [];
     currentStrokeRef.current = [];
     setStrokes([]);
+  };
+
+  const handleReset = () => {
+    handleClearCanvas();
+    setPrediction(null);
+    setIsCorrect(null);
     // The canvas will be cleared in the onResults loop
+  };
+
+  const handlePredict = async () => {
+    if (!model || !huruf) {
+      console.warn("Prediction aborted: Model or target char not ready.");
+      return;
+    }
+
+    if (strokesRef.current.length === 0 && currentStrokeRef.current.length === 0) {
+      console.warn("Prediction aborted: No strokes to predict.");
+      return;
+    }
+
+    setIsPredicting(true);
+    console.log("🧠 Starting AI Prediction...");
+
+    try {
+      // Create a dedicated high-contrast canvas for prediction (Black BG, White Strokes)
+      const predictCanvas = document.createElement("canvas");
+      predictCanvas.width = 224;
+      predictCanvas.height = 224;
+      const pctx = predictCanvas.getContext("2d");
+      if (!pctx) return;
+
+      // Fill black background
+      pctx.fillStyle = "#000000";
+      pctx.fillRect(0, 0, predictCanvas.width, predictCanvas.height);
+
+      // Draw strokes in pure white
+      pctx.strokeStyle = "#ffffff";
+      pctx.lineWidth = 10;
+      pctx.lineCap = "round";
+      pctx.lineJoin = "round";
+
+      // Calculate bounding box to normalize/center the character
+      const allPoints = [...strokesRef.current, currentStrokeRef.current].flat();
+      if (allPoints.length < 2) return;
+
+      const minX = Math.min(...allPoints.map(p => p.x));
+      const maxX = Math.max(...allPoints.map(p => p.x));
+      const minY = Math.min(...allPoints.map(p => p.y));
+      const maxY = Math.max(...allPoints.map(p => p.y));
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+      const size = Math.max(width, height) * 1.2; // Add some padding
+
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      // Transform context to center the drawing
+      pctx.save();
+      pctx.translate(predictCanvas.width / 2, predictCanvas.height / 2);
+      pctx.scale(predictCanvas.width / size, predictCanvas.height / size);
+      pctx.translate(-centerX, -centerY);
+
+      [...strokesRef.current, currentStrokeRef.current].forEach(stroke => {
+        if (stroke.length < 2) return;
+        pctx.beginPath();
+        pctx.moveTo(stroke[0].x, stroke[0].y);
+        for (let i = 1; i < stroke.length; i++) {
+          pctx.lineTo(stroke[i].x, stroke[i].y);
+        }
+        pctx.stroke();
+      });
+      pctx.restore();
+
+      // TF.js Inference
+      const tensor = tf.tidy(() => {
+        let t = tf.browser.fromPixels(predictCanvas);
+        t = t.toFloat().div(255.0);
+        return t.expandDims(0);
+      });
+
+      const output = model.predict(tensor) as tf.Tensor;
+      const data = await output.data();
+      const maxIdx = output.argMax(1).dataSync()[0];
+      const labels = type?.toLowerCase() === "katakana" ? KATAKANA_LABELS_FIXED : HIRAGANA_LABELS;
+      const predictedChar = labels[maxIdx];
+
+      // Calculate percentages
+      const confidence = data[maxIdx] * 100;
+      const targetIdx = labels.indexOf(huruf.char);
+      const targetConfidence = targetIdx !== -1 ? data[targetIdx] * 100 : 0;
+
+      console.log(`✅ Prediction: ${predictedChar} (${confidence.toFixed(2)}%)`);
+      console.log(`🎯 Target (${huruf.char}): ${targetConfidence.toFixed(2)}%`);
+
+      setPrediction(predictedChar);
+      setIsCorrect(predictedChar === huruf.char);
+
+      tensor.dispose();
+      output.dispose();
+    } catch (err) {
+      console.error("Prediction error:", err);
+    } finally {
+      setIsPredicting(false);
+    }
   };
 
   const handleSave = () => {
     if (strokesRef.current.length === 0 && currentStrokeRef.current.length === 0) return;
-    
+
     const saveCanvas = document.createElement("canvas");
     saveCanvas.width = 1280;
     saveCanvas.height = 720;
@@ -80,7 +261,7 @@ export default function WritingPractice() {
 
     sctx.fillStyle = "#050301";
     sctx.fillRect(0, 0, saveCanvas.width, saveCanvas.height);
-    
+
     sctx.shadowColor = "#F5D061";
     sctx.shadowBlur = 15;
     sctx.strokeStyle = "#F5D061";
@@ -99,7 +280,8 @@ export default function WritingPractice() {
     });
 
     setCapturedImage(saveCanvas.toDataURL("image/png"));
-    handleReset();
+    handlePredict();
+    handleClearCanvas();
   };
 
   useEffect(() => {
@@ -107,6 +289,7 @@ export default function WritingPractice() {
 
     let hands: any;
     let camera: any;
+    let isMounted = true;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -132,6 +315,8 @@ export default function WritingPractice() {
       const { Hands } = await import("@mediapipe/hands");
       const cameraUtils = await import("@mediapipe/camera_utils");
 
+      if (!isMounted) return;
+
       hands = new Hands({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
       });
@@ -146,7 +331,7 @@ export default function WritingPractice() {
       hands.onResults((results: any) => {
         if (!ctx || !dctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw Buttons
         const saveBox = { x1: 20, y1: 20, x2: 250, y2: 120 };
         const resetBox = { x1: canvas.width - 250, y1: 20, x2: canvas.width - 20, y2: 120 };
@@ -175,7 +360,6 @@ export default function WritingPractice() {
           for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
             const label = results.multiHandedness[i].label;
-            console.log(label)
             // Anatomical Right = Drawing, Anatomical Left = Control
             if (label === "Left") rightHand = landmarks;
             else leftHand = landmarks;
@@ -183,16 +367,16 @@ export default function WritingPractice() {
         }
 
         let writingActive = isShiftPressedRef.current;
-        
+
         if (leftHand) {
           const isOpen = isHandOpen(leftHand);
           // If hand is NOT open (i.e. closed/fist), writing is active
           if (!isOpen) writingActive = true;
-          
+
           ctx.fillStyle = !isOpen ? "#00ff00" : "#ff0000";
           ctx.font = "24px Arial";
           ctx.fillText(!isOpen ? "AKTIF MENULIS" : "TANGAN TERBUKA", 300, 50);
-          
+
           checkButtons(leftHand, canvas.width, canvas.height, saveBox, resetBox);
         }
 
@@ -220,7 +404,7 @@ export default function WritingPractice() {
               setStrokes([...strokesRef.current]);
             }
           }
-          
+
           checkButtons(rightHand, canvas.width, canvas.height, saveBox, resetBox);
         } else {
           sx = null; sy = null;
@@ -287,8 +471,12 @@ export default function WritingPractice() {
 
       camera = new cameraUtils.Camera(video, {
         onFrame: async () => {
-          if (video.readyState >= 2) {
-            await hands.send({ image: video });
+          if (video.readyState >= 2 && isMounted && hands) {
+            try {
+              await hands.send({ image: video });
+            } catch (err) {
+              console.error("MediaPipe send error:", err);
+            }
           }
         },
         width: 1280,
@@ -301,6 +489,7 @@ export default function WritingPractice() {
     init();
 
     return () => {
+      isMounted = false;
       camera?.stop?.();
       hands?.close?.();
     };
@@ -313,7 +502,7 @@ export default function WritingPractice() {
     <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-gray-50">
       <Container>
         <div className="mb-6 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => router.back()}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors"
           >
@@ -337,7 +526,7 @@ export default function WritingPractice() {
                 onLoadedMetadata={() => setVideoReady(true)}
                 className="w-full h-full object-cover scale-x-[-1]"
               />
-              
+
               {/* Overlay Canvas for UI (Buttons, Cursor, Status) */}
               <canvas
                 ref={canvasRef}
@@ -375,7 +564,18 @@ export default function WritingPractice() {
 
           {/* QUESTION AND RESULT SECTION */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-blue-500">
+            <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-blue-500 relative">
+              {isModelLoading && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-10">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                  <p className="text-[10px] font-bold text-blue-600 uppercase">Memuat AI...</p>
+                </div>
+              )}
+              {modelError && (
+                <div className="absolute inset-0 bg-red-50 flex flex-col items-center justify-center rounded-2xl z-10 p-4 text-center">
+                  <p className="text-[10px] font-bold text-red-600 uppercase">{modelError}</p>
+                </div>
+              )}
               <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">Tulis Huruf Ini</span>
               <p className="text-8xl font-bold text-gray-900 mb-2">{huruf.char}</p>
               <p className="text-2xl font-medium text-gray-500">{huruf.romaji}</p>
@@ -389,7 +589,7 @@ export default function WritingPractice() {
                   Hasil Tulisan
                 </h3>
                 {capturedImage && (
-                  <button 
+                  <button
                     onClick={() => setCapturedImage(null)}
                     className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
                     title="Hapus hasil"
@@ -398,16 +598,41 @@ export default function WritingPractice() {
                   </button>
                 )}
               </div>
-              
+
               {capturedImage ? (
                 <div className="relative group">
-                  <img 
-                    src={capturedImage} 
-                    alt="Hasil Tulisan" 
+                  <img
+                    src={capturedImage}
+                    alt="Hasil Tulisan"
                     className="w-full rounded-xl border-2 border-gray-200 shadow-inner bg-black"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
-                    <p className="text-white text-sm font-medium">Terakhir Diambil</p>
+
+                  {/* Prediction Result Overlay */}
+                  {prediction && (
+                    <div className={`mt-4 p-4 rounded-xl border-2 flex flex-col items-center gap-1 ${isCorrect ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+                      }`}>
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Hasil AI</span>
+                      <div className="flex items-center gap-3">
+                        <span className={`text-4xl font-bold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+                          {prediction}
+                        </span>
+                        <div className="h-8 w-[1px] bg-gray-300"></div>
+                        <span className={`text-lg font-bold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+                          {isCorrect ? "COCOK!" : "TIDAK COCOK"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {isPredicting && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center rounded-xl">
+                      <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin mb-2"></div>
+                      <p className="text-white text-xs font-medium">Menganalisis...</p>
+                    </div>
+                  )}
+
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="bg-black/50 text-white text-[10px] px-2 py-1 rounded-md backdrop-blur-sm">Terakhir Diambil</p>
                   </div>
                 </div>
               ) : (

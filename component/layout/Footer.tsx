@@ -22,7 +22,7 @@ export default function Footer() {
           <div className="hidden md:flex flex-col items-center lg:items-start text-sm gap-2 font-normal">
             <Link href="/">Home</Link>
             <Link href="/dictionary">Dictionary</Link>
-            <Link href="/quiz">Quiz</Link>
+            <Link href="/practice">Practice</Link>
           </div>
         </div>
 

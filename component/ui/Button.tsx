@@ -11,7 +11,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const base =
-  "px-4 py-3 font-medium transition-all duration-200 ease-in-out hover:cursor-pointer";
+  "px-4 py-3 font-medium transition-all duration-200 ease-in-out hover:cursor-pointer rounded-md";
 
 const variants = {
   primary: `

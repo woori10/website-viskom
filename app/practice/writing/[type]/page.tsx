@@ -3,7 +3,7 @@
 import Container from "@/component/ui/Container";
 import { useCamera } from "@/hooks/useCamera";
 import { Huruf, hurufList } from "@/lib/data/huruf";
-import { ArrowLeft, Trash2, Camera, RotateCcw } from "lucide-react";
+import { ArrowLeft, Camera, RotateCcw, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -21,7 +21,7 @@ export default function WritingPractice() {
   const [videoReady, setVideoReady] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isWriting, setIsWriting] = useState(false);
-  
+
   const videoRef = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,8 +70,12 @@ export default function WritingPractice() {
   };
 
   const handleSave = () => {
-    if (strokesRef.current.length === 0 && currentStrokeRef.current.length === 0) return;
-    
+    if (
+      strokesRef.current.length === 0 &&
+      currentStrokeRef.current.length === 0
+    )
+      return;
+
     const saveCanvas = document.createElement("canvas");
     saveCanvas.width = 1280;
     saveCanvas.height = 720;
@@ -80,7 +84,7 @@ export default function WritingPractice() {
 
     sctx.fillStyle = "#050301";
     sctx.fillRect(0, 0, saveCanvas.width, saveCanvas.height);
-    
+
     sctx.shadowColor = "#F5D061";
     sctx.shadowBlur = 15;
     sctx.strokeStyle = "#F5D061";
@@ -88,7 +92,7 @@ export default function WritingPractice() {
     sctx.lineCap = "round";
     sctx.lineJoin = "round";
 
-    [...strokesRef.current, currentStrokeRef.current].forEach(stroke => {
+    [...strokesRef.current, currentStrokeRef.current].forEach((stroke) => {
       if (stroke.length < 2) return;
       sctx.beginPath();
       sctx.moveTo(stroke[0].x, stroke[0].y);
@@ -133,7 +137,8 @@ export default function WritingPractice() {
       const cameraUtils = await import("@mediapipe/camera_utils");
 
       hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
       });
 
       hands.setOptions({
@@ -146,21 +151,36 @@ export default function WritingPractice() {
       hands.onResults((results: any) => {
         if (!ctx || !dctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw Buttons
         const saveBox = { x1: 20, y1: 20, x2: 250, y2: 120 };
-        const resetBox = { x1: canvas.width - 250, y1: 20, x2: canvas.width - 20, y2: 120 };
+        const resetBox = {
+          x1: canvas.width - 250,
+          y1: 20,
+          x2: canvas.width - 20,
+          y2: 120,
+        };
 
         ctx.strokeStyle = "#00ff00";
         ctx.lineWidth = 3;
-        ctx.strokeRect(saveBox.x1, saveBox.y1, saveBox.x2 - saveBox.x1, saveBox.y2 - saveBox.y1);
+        ctx.strokeRect(
+          saveBox.x1,
+          saveBox.y1,
+          saveBox.x2 - saveBox.x1,
+          saveBox.y2 - saveBox.y1,
+        );
         ctx.fillStyle = "#00ff00";
         ctx.font = "bold 40px Arial";
         ctx.fillText("SAVE", 70, 85);
 
         ctx.strokeStyle = "#ffa500";
         ctx.lineWidth = 3;
-        ctx.strokeRect(resetBox.x1, resetBox.y1, resetBox.x2 - resetBox.x1, resetBox.y2 - resetBox.y1);
+        ctx.strokeRect(
+          resetBox.x1,
+          resetBox.y1,
+          resetBox.x2 - resetBox.x1,
+          resetBox.y2 - resetBox.y1,
+        );
         ctx.fillStyle = "#ffa500";
         ctx.fillText("RESET", resetBox.x1 + 45, 85);
 
@@ -175,7 +195,7 @@ export default function WritingPractice() {
           for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
             const label = results.multiHandedness[i].label;
-            console.log(label)
+            console.log(label);
             // Anatomical Right = Drawing, Anatomical Left = Control
             if (label === "Left") rightHand = landmarks;
             else leftHand = landmarks;
@@ -183,17 +203,23 @@ export default function WritingPractice() {
         }
 
         let writingActive = isShiftPressedRef.current;
-        
+
         if (leftHand) {
           const isOpen = isHandOpen(leftHand);
           // If hand is NOT open (i.e. closed/fist), writing is active
           if (!isOpen) writingActive = true;
-          
+
           ctx.fillStyle = !isOpen ? "#00ff00" : "#ff0000";
           ctx.font = "24px Arial";
           ctx.fillText(!isOpen ? "AKTIF MENULIS" : "TANGAN TERBUKA", 300, 50);
-          
-          checkButtons(leftHand, canvas.width, canvas.height, saveBox, resetBox);
+
+          checkButtons(
+            leftHand,
+            canvas.width,
+            canvas.height,
+            saveBox,
+            resetBox,
+          );
         }
 
         setIsWriting(writingActive);
@@ -202,8 +228,13 @@ export default function WritingPractice() {
           const rx = (1 - rightHand[8].x) * canvas.width;
           const ry = rightHand[8].y * canvas.height;
 
-          if (sx === null || sy === null) { sx = rx; sy = ry; }
-          else { sx += (rx - sx) * 0.45; sy += (ry - sy) * 0.45; }
+          if (sx === null || sy === null) {
+            sx = rx;
+            sy = ry;
+          } else {
+            sx += (rx - sx) * 0.45;
+            sy += (ry - sy) * 0.45;
+          }
 
           // Cursor
           ctx.beginPath();
@@ -220,10 +251,17 @@ export default function WritingPractice() {
               setStrokes([...strokesRef.current]);
             }
           }
-          
-          checkButtons(rightHand, canvas.width, canvas.height, saveBox, resetBox);
+
+          checkButtons(
+            rightHand,
+            canvas.width,
+            canvas.height,
+            saveBox,
+            resetBox,
+          );
         } else {
-          sx = null; sy = null;
+          sx = null;
+          sy = null;
           if (currentStrokeRef.current.length > 0) {
             strokesRef.current.push([...currentStrokeRef.current]);
             currentStrokeRef.current = [];
@@ -240,7 +278,7 @@ export default function WritingPractice() {
         dctx.lineCap = "round";
         dctx.lineJoin = "round";
 
-        [...strokesRef.current, currentStrokeRef.current].forEach(stroke => {
+        [...strokesRef.current, currentStrokeRef.current].forEach((stroke) => {
           if (stroke.length < 2) return;
           dctx.beginPath();
           dctx.moveTo(stroke[0].x, stroke[0].y);
@@ -257,22 +295,46 @@ export default function WritingPractice() {
         const pips = [6, 10, 14, 18];
         const wrist = landmarks[0];
         for (let i = 0; i < tips.length; i++) {
-          const tipDist = Math.hypot(landmarks[tips[i]].x - wrist.x, landmarks[tips[i]].y - wrist.y);
-          const pipDist = Math.hypot(landmarks[pips[i]].x - wrist.x, landmarks[pips[i]].y - wrist.y);
+          const tipDist = Math.hypot(
+            landmarks[tips[i]].x - wrist.x,
+            landmarks[tips[i]].y - wrist.y,
+          );
+          const pipDist = Math.hypot(
+            landmarks[pips[i]].x - wrist.x,
+            landmarks[pips[i]].y - wrist.y,
+          );
           if (tipDist > pipDist) openFingers++;
         }
         return openFingers >= 3;
       }
 
-      function checkButtons(landmarks: any, w: number, h: number, saveBox: any, resetBox: any) {
+      function checkButtons(
+        landmarks: any,
+        w: number,
+        h: number,
+        saveBox: any,
+        resetBox: any,
+      ) {
         const tips = [4, 8, 12, 16, 20];
         let fingersInSave = 0;
         let fingersInReset = 0;
         for (const id of tips) {
           const cx = (1 - landmarks[id].x) * w;
           const cy = landmarks[id].y * h;
-          if (cx >= saveBox.x1 && cx <= saveBox.x2 && cy >= saveBox.y1 && cy <= saveBox.y2) fingersInSave++;
-          if (cx >= resetBox.x1 && cx <= resetBox.x2 && cy >= resetBox.y1 && cy <= resetBox.y2) fingersInReset++;
+          if (
+            cx >= saveBox.x1 &&
+            cx <= saveBox.x2 &&
+            cy >= saveBox.y1 &&
+            cy <= saveBox.y2
+          )
+            fingersInSave++;
+          if (
+            cx >= resetBox.x1 &&
+            cx <= resetBox.x2 &&
+            cy >= resetBox.y1 &&
+            cy <= resetBox.y2
+          )
+            fingersInReset++;
         }
         const now = Date.now();
         if (fingersInSave >= 3 && now - lastSaveTime > 2000) {
@@ -306,14 +368,18 @@ export default function WritingPractice() {
     };
   }, [videoReady]);
 
-
-  if (!huruf) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (!huruf)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
 
   return (
     <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-gray-50">
       <Container>
         <div className="mb-6 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => router.back()}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors"
           >
@@ -337,7 +403,7 @@ export default function WritingPractice() {
                 onLoadedMetadata={() => setVideoReady(true)}
                 className="w-full h-full object-cover scale-x-[-1]"
               />
-              
+
               {/* Overlay Canvas for UI (Buttons, Cursor, Status) */}
               <canvas
                 ref={canvasRef}
@@ -375,21 +441,32 @@ export default function WritingPractice() {
 
           {/* QUESTION AND RESULT SECTION */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-blue-500">
-              <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">Tulis Huruf Ini</span>
-              <p className="text-8xl font-bold text-gray-900 mb-2">{huruf.char}</p>
-              <p className="text-2xl font-medium text-gray-500">{huruf.romaji}</p>
+            <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-primary">
+              <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+                Tulis Huruf Ini
+              </span>
+              {/* <p className="text-8xl font-bold text-gray-900 mb-2">
+                {huruf.char}
+              </p> */}
+              <p className="text-2xl font-medium text-primary">
+                {huruf.romaji}
+              </p>
+              <img
+                src={huruf.strokeOrder}
+                alt={`Stroke order ${huruf.char}`}
+                className="w-22 h-22 object-contain"
+              />
             </div>
 
             {/* Captured Image Display */}
             <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 min-h-[200px]">
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-blue-500" />
+                  <Camera className="w-5 h-5 text-primary" />
                   Hasil Tulisan
                 </h3>
                 {capturedImage && (
-                  <button 
+                  <button
                     onClick={() => setCapturedImage(null)}
                     className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
                     title="Hapus hasil"
@@ -398,16 +475,18 @@ export default function WritingPractice() {
                   </button>
                 )}
               </div>
-              
+
               {capturedImage ? (
                 <div className="relative group">
-                  <img 
-                    src={capturedImage} 
-                    alt="Hasil Tulisan" 
+                  <img
+                    src={capturedImage}
+                    alt="Hasil Tulisan"
                     className="w-full rounded-xl border-2 border-gray-200 shadow-inner bg-black"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
-                    <p className="text-white text-sm font-medium">Terakhir Diambil</p>
+                    <p className="text-white text-sm font-medium">
+                      Terakhir Diambil
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -415,7 +494,10 @@ export default function WritingPractice() {
                   <div className="bg-gray-50 p-4 rounded-full mb-3">
                     <RotateCcw className="w-8 h-8 text-gray-300" />
                   </div>
-                  <p className="text-sm">Gunakan fitur SAVE pada kamera untuk menampilkan hasil di sini</p>
+                  <p className="text-sm">
+                    Gunakan fitur SAVE pada kamera untuk menampilkan hasil di
+                    sini
+                  </p>
                 </div>
               )}
             </div>

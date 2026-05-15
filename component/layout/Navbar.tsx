@@ -13,12 +13,10 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-gray-300 bg-(--color-secondary)">
+    <header className="border-b border-gray-300 bg-secondary">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
-        <h1 className="text-lg font-bold text-(--color-primary)">
-          KataHira Learn
-        </h1>
+        <h1 className="text-lg font-bold text-primary">KataHira Learn</h1>
 
         {/* Menu */}
         <nav className="flex gap-6">
@@ -31,8 +29,8 @@ export default function Navbar() {
                 href={item.href}
                 className={`text-sm font-medium transition ${
                   active
-                    ? "text-(--color-primary)"
-                    : "text-(--color-text-secondary) hover:text-(--color-primary)"
+                    ? "text-primary"
+                    : "text-text-secondary hover:text-primary"
                 }`}
               >
                 {item.label}

@@ -7,9 +7,6 @@ import { useRouter } from "next/navigation";
 export default function Quiz() {
   type Category = "Hiragana" | "Katakana";
 
-  //const [active, setActive] = useState<Category>("Hiragana");
-  //const filteredHuruf = hurufList.filter((item) => item.type === active);
-  //const [selectedHuruf, setSelectedHuruf] = useState<Huruf | null>(null);
   const router = useRouter();
 
   return (
@@ -30,64 +27,88 @@ export default function Quiz() {
             </div> */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Card Belajar Menulis */}
-              <div className="border border-gray-200 rounded-2xl p-6 space-y-8 bg-white shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="space-y-2 text-center">
-                  <h2 className="text-2xl font-bold">Belajar Menulis</h2>
-                  <p className="text-sm text-text-secondary">
-                    Latih kemampuan menulis huruf Jepang secara interaktif dan
-                    menyenangkan.
-                  </p>
-                </div>
+              <div className="relative overflow-hidden border border-primary/10 rounded-3xl p-6 md:p-8 bg-linear-to-br from-white to-red-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                {/* Accent Blur */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
 
-                <div className="h-40 w-full rounded-xl bg-gray-100 flex items-center justify-center">
-                  Gambar Ilustrasi
-                </div>
+                <div className="relative space-y-8">
+                  <div className="space-y-3 text-center">
+                    <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      Interactive Writing
+                    </div>
 
-                <div className="flex flex-col gap-3">
-                  {["Hiragana", "Katakana"].map((item) => (
-                    <Button
-                      key={item}
-                      variant="primary"
-                      onClick={() => {
-                        console.log(item.toLowerCase());
-                        router.push(`/practice/writing/${item.toLowerCase()}`);
-                      }}
-                      className="rounded-xl w-full"
-                    >
-                      {item}
-                    </Button>
-                  ))}
+                    <h2 className="text-xl md:text-2xl font-bold">
+                      Belajar Menulis
+                    </h2>
+
+                    <p className="text-sm md:text-base text-text-secondary leading-relaxed">
+                      Latih kemampuan menulis huruf Jepang secara interaktif
+                      menggunakan latihan visual yang mudah dipahami.
+                    </p>
+                  </div>
+
+                  <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
+                    Gambar Ilustrasi
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {["Hiragana", "Katakana"].map((item) => (
+                      <Button
+                        key={item}
+                        variant="primary"
+                        onClick={() => {
+                          router.push(
+                            `/practice/writing/${item.toLowerCase()}`,
+                          );
+                        }}
+                        className="rounded-xl w-full"
+                      >
+                        {item}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Card Tebak Huruf */}
-              <div className="border border-gray-200 rounded-2xl p-6 space-y-8 bg-white shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="space-y-2 text-center">
-                  <h2 className="text-2xl font-bold">Quiz Tebak Huruf</h2>
-                  <p className="text-sm text-text-secondary">
-                    Uji kemampuanmu mengenali Hiragana dan Katakana dengan quiz
-                    interaktif.
-                  </p>
-                </div>
+              <div className="relative overflow-hidden border border-primary/10 rounded-3xl p-6 md:p-8 bg-linear-to-br from-white to-red-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                {/* Accent Blur */}
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-200/30 rounded-full blur-3xl" />
 
-                <div className="h-40 w-full rounded-xl bg-gray-100 flex items-center justify-center">
-                  Gambar Ilustrasi
-                </div>
+                <div className="relative space-y-8">
+                  <div className="space-y-3 text-center">
+                    <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      Interactive Quiz
+                    </div>
 
-                <div className="flex flex-col gap-3">
-                  {["Hiragana", "Katakana"].map((item) => (
-                    <Button
-                      key={item}
-                      variant="primary"
-                      onClick={() => {
-                        console.log(item.toLowerCase());
-                        router.push(`/practice/quiz/${item.toLowerCase()}`);
-                      }}
-                      className="rounded-xl w-full"
-                    >
-                      {item}
-                    </Button>
-                  ))}
+                    <h2 className="text-xl md:text-2xl font-bold">
+                      Quiz Tebak Huruf
+                    </h2>
+
+                    <p className="text-sm md:text-base text-text-secondary leading-relaxed">
+                      Uji kemampuanmu mengenali huruf Hiragana dan Katakana
+                      dengan quiz interaktif berbasis gesture tangan.
+                    </p>
+                  </div>
+
+                  <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
+                    Gambar Ilustrasi
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {["Hiragana", "Katakana"].map((item) => (
+                      <Button
+                        key={item}
+                        variant="secondary"
+                        onClick={() => {
+                          router.push(`/practice/quiz/${item.toLowerCase()}`);
+                        }}
+                        className="rounded-xl w-full"
+                      >
+                        {item}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

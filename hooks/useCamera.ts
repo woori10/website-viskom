@@ -19,7 +19,13 @@ export function useCamera() {
 
         video.srcObject = stream;
 
-        await video.play();
+        if (video.paused) {
+          await video.play().catch((err) => {
+            if (err.name !== "AbortError") {
+              console.error("Camera play error:", err);
+            }
+          });
+        }
 
         console.log("🎥 CAMERA STARTED");
       } catch (err) {

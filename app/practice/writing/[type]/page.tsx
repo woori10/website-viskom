@@ -753,6 +753,7 @@ export default function WritingPractice() {
   return (
     <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-gray-50">
       <Container>
+        {/* HEADER */}
         <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => router.back()}
@@ -760,12 +761,15 @@ export default function WritingPractice() {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center">
             Latihan Menulis {type === "hiragana" ? "Hiragana" : "Katakana"}
           </h1>
-          <div className="w-10"></div> {/* Spacer */}
+
+          <div className="w-10" />
         </div>
 
+        {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* CAMERA SECTION */}
           <div className="lg:col-span-8">
@@ -779,13 +783,13 @@ export default function WritingPractice() {
                 className="w-full h-full object-cover scale-x-[-1]"
               />
 
-              {/* Overlay Canvas for UI (Buttons, Cursor, Status) */}
+              {/* Overlay Canvas */}
               <canvas
                 ref={canvasRef}
                 className="absolute inset-0 w-full h-full pointer-events-none"
               />
 
-              {/* Drawing Canvas for persistent strokes */}
+              {/* Drawing Canvas */}
               <canvas
                 ref={drawingCanvasRef}
                 className="absolute inset-0 w-full h-full pointer-events-none"
@@ -794,39 +798,46 @@ export default function WritingPractice() {
               {!videoReady && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white gap-4">
                   <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+
                   <p className="text-lg font-medium">Memulai Kamera...</p>
                 </div>
               )}
             </div>
 
+            {/* INFO */}
             <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                 <span>Tangan Kiri Terbuka: Berhenti</span>
               </div>
+
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                 <span>Tangan Kiri Tertutup: Menulis</span>
               </div>
+
               <div className="flex items-center gap-2 font-medium text-blue-600">
                 <span>Gunakan Jari Telunjuk Tangan Kanan untuk Menulis</span>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* QUESTION AND RESULT SECTION */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-primary">
-            <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center justify-center border-t-4 border-blue-500 relative">
+          {/* RIGHT SECTION */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* QUESTION CARD */}
+            <div className="bg-white p-6 rounded-2xl shadow-xl border-t-4 border-primary relative overflow-hidden">
+              {/* MODEL LOADING */}
               {isModelLoading && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-10">
                   <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+
                   <p className="text-[10px] font-bold text-blue-600 uppercase">
                     Memuat AI...
                   </p>
                 </div>
               )}
+
+              {/* MODEL ERROR */}
               {modelError && (
                 <div className="absolute inset-0 bg-red-50 flex flex-col items-center justify-center rounded-2xl z-10 p-4 text-center">
                   <p className="text-[10px] font-bold text-red-600 uppercase">
@@ -834,26 +845,34 @@ export default function WritingPractice() {
                   </p>
                 </div>
               )}
-              <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
-                Tulis Huruf Ini
-              </span>
-              <p className="text-2xl font-medium text-gray-500">
-                {huruf.romaji}
-              </p>
-              <img
-                src={huruf.strokeOrder}
-                alt={`Stroke order ${huruf.char}`}
-                className="w-22 h-22 object-contain"
-              />
+
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+                  Tulis Huruf Ini
+                </span>
+
+                <p className="text-lg font-medium text-gray-500 mb-4">
+                  {huruf.romaji}
+                </p>
+
+                <div className="rounded-2xl">
+                  <img
+                    src={huruf.strokeOrder}
+                    alt={`Stroke order ${huruf.char}`}
+                    className="w-20 h-20 object-contain"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Captured Image Display */}
-            <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 min-h-[200px]">
+            {/* RESULT CARD */}
+            <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 min-h-[250px]">
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
                   <Camera className="w-5 h-5 text-primary" />
                   Hasil Tulisan
                 </h3>
+
                 {capturedImage && (
                   <button
                     onClick={() => setCapturedImage(null)}
@@ -873,7 +892,7 @@ export default function WritingPractice() {
                     className="w-full rounded-xl border-2 border-gray-200 shadow-inner bg-black"
                   />
 
-                  {/* Prediction Result Overlay */}
+                  {/* AI RESULT */}
                   {prediction && (
                     <div
                       className={`mt-4 p-4 rounded-xl border-2 flex flex-col items-center gap-1 ${
@@ -885,15 +904,22 @@ export default function WritingPractice() {
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                         Hasil AI
                       </span>
+
                       <div className="flex items-center gap-3">
                         <span
-                          className={`text-4xl font-bold ${isCorrect ? "text-green-600" : "text-red-600"}`}
+                          className={`text-4xl font-bold ${
+                            isCorrect ? "text-green-600" : "text-red-600"
+                          }`}
                         >
                           {prediction}
                         </span>
+
                         <div className="h-8 w-[1px] bg-gray-300"></div>
+
                         <span
-                          className={`text-lg font-bold ${isCorrect ? "text-green-600" : "text-red-600"}`}
+                          className={`text-lg font-bold ${
+                            isCorrect ? "text-green-600" : "text-red-600"
+                          }`}
                         >
                           {isCorrect ? "COCOK!" : "TIDAK COCOK"}
                         </span>
@@ -901,9 +927,11 @@ export default function WritingPractice() {
                     </div>
                   )}
 
+                  {/* LOADING PREDICT */}
                   {isPredicting && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center rounded-xl">
                       <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin mb-2"></div>
+
                       <p className="text-white text-xs font-medium">
                         Menganalisis...
                       </p>
@@ -921,6 +949,7 @@ export default function WritingPractice() {
                   <div className="bg-gray-50 p-4 rounded-full mb-3">
                     <RotateCcw className="w-8 h-8 text-gray-300" />
                   </div>
+
                   <p className="text-sm">
                     Gunakan fitur SAVE pada kamera untuk menampilkan hasil di
                     sini

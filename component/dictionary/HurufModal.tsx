@@ -116,10 +116,8 @@ export default function HurufModal({
                   {/* Loader */}
                   {imageLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-2xl">
-                      <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-
-                      <p className="mt-3 text-xs text-text-secondary">
-                        Memuat stroke order...
+                      <p className="my-4 text-sm text-text-secondary">
+                        Memuat Gambar...
                       </p>
                     </div>
                   )}

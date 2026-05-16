@@ -851,22 +851,22 @@ export default function WritingPractice() {
                   Tulis Huruf Ini
                 </span>
 
-                <p className="text-lg font-medium text-gray-500 mb-4">
-                  {huruf.romaji}
-                </p>
-
-                <div className="rounded-2xl">
+                <div className="mb-4">
                   <img
                     src={huruf.strokeOrder}
                     alt={`Stroke order ${huruf.char}`}
                     className="w-20 h-20 object-contain"
                   />
                 </div>
+
+                <p className="text-lg font-medium text-gray-500">
+                  {huruf.romaji}
+                </p>
               </div>
             </div>
 
             {/* RESULT CARD */}
-            <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 min-h-[250px]">
+            <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col gap-4 border-t-4 border-primary min-h-[250px]">
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
                   <Camera className="w-5 h-5 text-primary" />

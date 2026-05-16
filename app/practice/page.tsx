@@ -12,15 +12,15 @@ export default function Quiz() {
   return (
     <section className="pt-24 pb-10 md:py-14">
       <Container>
-        <div className="space-y-10">
+        <div data-aos="fade-up" className="space-y-12">
           <div className="flex-1 text-center md:text-left space-y-8">
             <h1 className="text-3xl md:text-5xl font-black uppercase">
-              Tebak Hiragana Katakana
+              Latihan Hiragana & Katakana
             </h1>
-            <p className="mt-4 text-base text-text-secondary max-w-3xl w-full">
-              Rasakan pengalaman belajar yang lebih interaktif! Tebak huruf
-              Hiragana dan Katakana dengan cara yang seru dan berbeda, sambil
-              melatih daya ingatmu secara menyenangkan.
+            <p className="mt-4 leading-relaxed text-base text-text-secondary max-w-3xl w-full">
+              Rasakan pengalaman belajar yang lebih interaktif! Latih kemampuan
+              menulis serta tebak huruf Hiragana dan Katakana dengan cara yang
+              seru dan menyenangkan sambil memperkuat daya ingatmu.
             </p>
             {/* <div className="h-50 my-20 md:my-16 w-full rounded-xl bg-gray-100 flex items-center justify-center">
               Gambar Ilustrasi Pengerjaan Quiz
@@ -32,12 +32,12 @@ export default function Quiz() {
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
 
                 <div className="relative space-y-8">
-                  <div className="space-y-3 text-center">
+                  <div className="space-y-6 text-center">
                     <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
                       Interactive Writing
                     </div>
 
-                    <h2 className="text-xl md:text-2xl font-bold">
+                    <h2 className="text-2xl md:text-3xl font-bold">
                       Belajar Menulis
                     </h2>
 
@@ -47,9 +47,9 @@ export default function Quiz() {
                     </p>
                   </div>
 
-                  <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
+                  {/* <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
                     Gambar Ilustrasi
-                  </div>
+                  </div> */}
 
                   <div className="flex flex-col gap-3">
                     {["Hiragana", "Katakana"].map((item) => (
@@ -61,7 +61,7 @@ export default function Quiz() {
                             `/practice/writing/${item.toLowerCase()}`,
                           );
                         }}
-                        className="rounded-xl w-full"
+                        className=" rounded-xl w-full bg-primary/85 hover:bg-primary text-white"
                       >
                         {item}
                       </Button>
@@ -76,12 +76,12 @@ export default function Quiz() {
                 <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-200/30 rounded-full blur-3xl" />
 
                 <div className="relative space-y-8">
-                  <div className="space-y-3 text-center">
+                  <div className="space-y-6 text-center">
                     <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
                       Interactive Quiz
                     </div>
 
-                    <h2 className="text-xl md:text-2xl font-bold">
+                    <h2 className="text-2xl md:text-3xl font-bold">
                       Quiz Tebak Huruf
                     </h2>
 
@@ -91,19 +91,19 @@ export default function Quiz() {
                     </p>
                   </div>
 
-                  <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
+                  {/* <div className="h-48 w-full rounded-2xl bg-white border border-primary/10 flex items-center justify-center shadow-inner">
                     Gambar Ilustrasi
-                  </div>
+                  </div> */}
 
                   <div className="flex flex-col gap-3">
                     {["Hiragana", "Katakana"].map((item) => (
                       <Button
                         key={item}
-                        variant="secondary"
+                        variant="primary"
                         onClick={() => {
                           router.push(`/practice/quiz/${item.toLowerCase()}`);
                         }}
-                        className="rounded-xl w-full"
+                        className=" rounded-xl w-full bg-primary/85 hover:bg-primary text-white"
                       >
                         {item}
                       </Button>

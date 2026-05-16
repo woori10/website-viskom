@@ -23,10 +23,10 @@ export default function HeroSection() {
             </h1>
             <p className="mt-4 text-base text-text-secondary">
               Kuasai Hiragama dan Katakana melalui pendekatan visual yang
-              menenagkan dan interaktif. Mulai dari dasar dengan Sakura Learn
+              menyenangkan dan interaktif.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-              <Link href="/quiz" className="w-full">
+              <Link href="/practice" className="w-full">
                 <Button variant="primary" className="w-full">
                   Mulai Belajar
                 </Button>

@@ -8,11 +8,11 @@ export default function Footer() {
         {/* Kolom 1 */}
         <div className="text-center md:text-left">
           <h2 className="font-black text-primary text-lg mb-4 uppercase">
-            Sakura Learn
+            KataHira Learn
           </h2>
           <p className="text-sm leading-relaxed">
             Kuasai Hiragama dan Katakana melalui pendekatan visual yang
-            menenagkan dan interaktif. Mulai dari dasar dengan Sakura Learn
+            menenagkan dan interaktif. Mulai dari dasar dengan KataHira Learn
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function Footer() {
           <div className="flex flex-col gap-2 items-center md:items-start text-sm text-center md:text-left">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              <p className="text-md">adminkirsepuluh@gmail.com</p>
+              <p className="text-md">katahiralearn@gmail.com</p>
             </div>
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
@@ -64,7 +64,7 @@ export default function Footer() {
 
       {/* divider */}
       <div className="border-t border-gray-200 mt-10 pt-4 text-center text-sm">
-        © Copyright Sakura Learn. All Rights Reserved
+        © Copyright KataHira Learn. All Rights Reserved
       </div>
     </div>
   );

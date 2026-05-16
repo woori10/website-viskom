@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={plusJakarta.variable}>
-      <body className="min-h-screen flex flex-col bg-(--color-secondary) text-(--color-text-primary)">
+      <body className="min-h-screen flex flex-col bg-secondary text-(--color-text-primary)">
         <AOSProvider />
         {/* Desktop Navbar */}
         <div className="hidden md:block">

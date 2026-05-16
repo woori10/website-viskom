@@ -16,7 +16,9 @@ export default function Navbar() {
     <header className="border-b border-gray-300 bg-secondary">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
-        <h1 className="text-lg font-bold text-primary">KataHira Learn</h1>
+        <Link href={"/"}>
+          <h1 className="text-lg font-bold text-primary">KataHira Learn</h1>
+        </Link>
 
         {/* Menu */}
         <nav className="flex gap-6">

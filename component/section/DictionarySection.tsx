@@ -26,7 +26,7 @@ export default function DictionarySection() {
           >
             {/* Kiri */}
             <div className="border border-(--color-ternary) w-full md:col-span-2 p-8">
-              <div className="bg-(--color-primary) text-white w-fit">
+              <div className="bg-primary text-white w-fit">
                 <BookOpenText className="w-14 h-14 p-4" />
               </div>
               <div className="mt-4">
@@ -36,25 +36,26 @@ export default function DictionarySection() {
               </div>
               <div className="mt-4">
                 <p className="text-text-secondary text-sm font-normal">
-                  Mari belajar hiragana
+                  Mulailah perjalanan belajar bahasa Jepang dengan mengenal
+                  huruf dasar Hiragana.
                 </p>
               </div>
             </div>
 
             {/* Kanan */}
             <div className="bg-(--color-ternary) w-full md:col-span-1 p-6">
-              <div className="bg-(--color-primary) text-white w-fit">
+              <div className="bg-primary text-white w-fit">
                 <Pencil className="w-14 h-14 p-4" />
               </div>
               <div className="mt-4">
-                <p className="text-(--color-secondary) text-3xl font-semibold uppercase">
-                  writing quiz
+                <p className="text-secondary text-3xl font-semibold uppercase">
+                  practice writing
                 </p>
               </div>
               <div className="mt-4">
-                <p className="text-(--color-text-ternary) text-sm font-normal">
-                  Latih daya ingatmu dengan kuis menulis interaktif langsung
-                  dari layar gadget-mu.
+                <p className="text-text-ternary text-sm font-normal">
+                  Latih cara menulis huruf Jepang dengan mengikuti urutan
+                  goresan yang benar.
                 </p>
               </div>
             </div>
@@ -68,25 +69,25 @@ export default function DictionarySection() {
           >
             {/* Kiri */}
             <div className="bg-(--color-ternary) w-full md:col-span-1 p-6">
-              <div className="bg-(--color-primary) text-white w-fit">
+              <div className="bg-primary text-white w-fit">
                 <Pencil className="w-14 h-14 p-4" />
               </div>
               <div className="mt-4">
-                <p className="text-(--color-secondary) text-3xl font-semibold uppercase">
-                  writing quiz
+                <p className="text-secondary text-3xl font-semibold uppercase">
+                  quiz
                 </p>
               </div>
               <div className="mt-4">
-                <p className="text-(--color-text-ternary) text-sm font-normal">
-                  Latih daya ingatmu dengan kuis menulis interaktif langsung
-                  dari layar gadget-mu.
+                <p className="text-text-ternary text-sm font-normal">
+                  Uji kemampuanmu mengenali Hiragana dan Katakana lewat quiz
+                  yang seru dan interaktif.
                 </p>
               </div>
             </div>
 
             {/* Kanan */}
             <div className="border border-(--color-ternary) w-full md:col-span-2 p-8">
-              <div className="bg-(--color-primary) text-white w-fit">
+              <div className="bg-primary text-white w-fit">
                 <BookOpenText className="w-14 h-14 p-4" />
               </div>
               <div className="mt-4">
@@ -95,8 +96,9 @@ export default function DictionarySection() {
                 </p>
               </div>
               <div className="mt-4">
-                <p className="text-(--color-text-secondary) text-sm font-normal">
-                  Mari belajar hiragana
+                <p className="text-text-secondary text-sm font-normal">
+                  Pelajari karakter Katakana yang digunakan untuk kata asing dan
+                  istilah modern.
                 </p>
               </div>
             </div>

@@ -23,6 +23,8 @@ export default function HurufModal({
     setTimeout(onClose, 200); // samain sama duration
   };
 
+  const [imageLoading, setImageLoading] = useState(true);
+
   return (
     <div className="fixed inset-0 z-50">
       {/* BACKDROP */}
@@ -110,11 +112,26 @@ export default function HurufModal({
                   Stroke Order
                 </p>
 
-                <div className="bg-white border border-primary/10 rounded-2xl p-4 flex items-center justify-center shadow-sm">
+                <div className="relative bg-white border border-primary/10 rounded-2xl p-4 flex items-center justify-center shadow-sm">
+                  {/* Loader */}
+                  {imageLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-2xl">
+                      <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+
+                      <p className="mt-3 text-xs text-text-secondary">
+                        Memuat stroke order...
+                      </p>
+                    </div>
+                  )}
+
                   <img
                     src={data.strokeOrder}
                     alt={`Stroke order ${data.char}`}
-                    className="w-full max-w-xs mx-auto object-contain"
+                    onLoad={() => setImageLoading(false)}
+                    className={`
+                      w-full max-w-xs mx-auto object-contain transition-opacity duration-300
+                      ${imageLoading ? "opacity-0" : "opacity-100"}
+                    `}
                   />
                 </div>
               </div>

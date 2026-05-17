@@ -13,7 +13,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-gray-300 bg-secondary">
+    <header className="fixed top-0 left-0 w-full z-50 border-b border-gray-300 bg-secondary/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <Link href={"/"}>

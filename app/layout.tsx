@@ -42,7 +42,7 @@ export default function RootLayout({
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        <main className="flex-1 pt-24 pb-20 md:pb-0">{children}</main>
 
         {/* Footer */}
         <div className="hidden md:block">

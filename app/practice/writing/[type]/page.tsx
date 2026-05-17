@@ -1102,7 +1102,7 @@ export default function WritingPractice() {
     );
 
   return (
-    <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-gray-50">
+    <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-secondary">
       <Container>
         {/* HEADER */}
         <div className="mb-6 flex items-center justify-between">

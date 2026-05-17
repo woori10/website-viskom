@@ -3,12 +3,23 @@
 import Container from "@/component/ui/Container";
 import { useCamera } from "@/hooks/useCamera";
 import { Huruf, hurufList } from "@/lib/data/huruf";
-import { ArrowLeft, Check, X, Award, HelpCircle, ChevronRight, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Award,
+  Check,
+  ChevronRight,
+  HelpCircle,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 // Types
-interface Point { x: number; y: number }
+interface Point {
+  x: number;
+  y: number;
+}
 
 interface QuizQuestion {
   correctHuruf: Huruf;
@@ -39,7 +50,9 @@ export default function QuizDetail() {
   const [score, setScore] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
-  const [autoNextCountdown, setAutoNextCountdown] = useState<number | null>(null);
+  const [autoNextCountdown, setAutoNextCountdown] = useState<number | null>(
+    null,
+  );
 
   // Hand / Camera States
   const [fingerCount, setFingerCount] = useState(0);
@@ -80,7 +93,7 @@ export default function QuizDetail() {
   // Generate dynamic MCQ question
   const generateQuestion = (currentType: string): QuizQuestion | null => {
     const filtered = hurufList.filter(
-      (h) => h.type.toLowerCase() === currentType?.toLowerCase()
+      (h) => h.type.toLowerCase() === currentType?.toLowerCase(),
     );
     if (filtered.length === 0) return null;
 
@@ -88,15 +101,23 @@ export default function QuizDetail() {
     const correctHuruf = filtered[Math.floor(Math.random() * filtered.length)];
 
     // Get 3 distractors
-    const distractors = filtered.filter((h) => h.romaji !== correctHuruf.romaji);
-    const shuffledDistractors = [...distractors].sort(() => 0.5 - Math.random());
+    const distractors = filtered.filter(
+      (h) => h.romaji !== correctHuruf.romaji,
+    );
+    const shuffledDistractors = [...distractors].sort(
+      () => 0.5 - Math.random(),
+    );
     const selectedDistractors = shuffledDistractors.slice(0, 3);
 
     // Combine and shuffle options
-    const options = [correctHuruf, ...selectedDistractors].sort(() => 0.5 - Math.random());
-    
+    const options = [correctHuruf, ...selectedDistractors].sort(
+      () => 0.5 - Math.random(),
+    );
+
     // Find correct index
-    const correctIndex = options.findIndex((o) => o.romaji === correctHuruf.romaji);
+    const correctIndex = options.findIndex(
+      (o) => o.romaji === correctHuruf.romaji,
+    );
 
     return {
       correctHuruf,
@@ -144,7 +165,8 @@ export default function QuizDetail() {
     autoNextIntervalRef.current = setInterval(() => {
       setAutoNextCountdown((prev) => {
         if (prev === null || prev <= 1) {
-          if (autoNextIntervalRef.current) clearInterval(autoNextIntervalRef.current);
+          if (autoNextIntervalRef.current)
+            clearInterval(autoNextIntervalRef.current);
           return null;
         }
         return prev - 1;
@@ -214,7 +236,8 @@ export default function QuizDetail() {
   useEffect(() => {
     return () => {
       if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
-      if (autoNextIntervalRef.current) clearInterval(autoNextIntervalRef.current);
+      if (autoNextIntervalRef.current)
+        clearInterval(autoNextIntervalRef.current);
     };
   }, []);
 
@@ -268,11 +291,27 @@ export default function QuizDetail() {
         if (landmarks && !answered) {
           // Connections lines
           const connections = [
-            [0, 1], [1, 2], [2, 3], [3, 4],
-            [0, 5], [5, 6], [6, 7], [7, 8],
-            [5, 9], [9, 10], [10, 11], [11, 12],
-            [9, 13], [13, 14], [14, 15], [15, 16],
-            [13, 17], [0, 17], [17, 18], [18, 19], [19, 20],
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 4],
+            [0, 5],
+            [5, 6],
+            [6, 7],
+            [7, 8],
+            [5, 9],
+            [9, 10],
+            [10, 11],
+            [11, 12],
+            [9, 13],
+            [13, 14],
+            [14, 15],
+            [15, 16],
+            [13, 17],
+            [0, 17],
+            [17, 18],
+            [18, 19],
+            [19, 20],
           ];
 
           ctx.strokeStyle = "rgba(188, 0, 45, 0.4)";
@@ -320,7 +359,7 @@ export default function QuizDetail() {
               const duration = now - (hoverStartTimeRef.current || now);
               const progress = Math.min(duration / 1000, 1.0); // 1.0s holding duration
               hoverProgressRef.current = progress;
-              
+
               setHoveredIndex(hoveredBoxIdx);
               setHoverProgress(progress);
 
@@ -346,29 +385,35 @@ export default function QuizDetail() {
             const cy = palmCenterLm.y * canvas.height;
             const progress = hoverProgressRef.current;
             const radius = 60;
-            
+
             // Outer glow / shadow
             ctx.save();
             ctx.shadowColor = "#bc002d";
             ctx.shadowBlur = 15;
-            
+
             // Draw background circle
             ctx.beginPath();
             ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
             ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
             ctx.lineWidth = 6;
             ctx.stroke();
-            
+
             // Draw progress arc
             ctx.beginPath();
-            ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + progress * 2 * Math.PI);
+            ctx.arc(
+              cx,
+              cy,
+              radius,
+              -Math.PI / 2,
+              -Math.PI / 2 + progress * 2 * Math.PI,
+            );
             ctx.strokeStyle = "#bc002d"; // Sakura/Japan Red
             ctx.lineWidth = 8;
             ctx.lineCap = "round";
             ctx.stroke();
-            
+
             ctx.restore();
-            
+
             // Draw selection text badge above palm center
             ctx.fillStyle = "rgba(26, 28, 28, 0.9)";
             ctx.beginPath();
@@ -377,16 +422,24 @@ export default function QuizDetail() {
             ctx.strokeStyle = "#bc002d";
             ctx.lineWidth = 1.5;
             ctx.stroke();
-            
+
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 13px var(--font-sans), Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             if (currentQ && currentQ.options[hoveredBoxIdx]) {
               const opt = currentQ.options[hoveredBoxIdx];
-              ctx.fillText(`Pilihan ${hoveredBoxIdx + 1}: ${opt.romaji.toUpperCase()} (${opt.char})`, cx, cy - radius - 29);
+              ctx.fillText(
+                `Pilihan ${hoveredBoxIdx + 1}: ${opt.romaji.toUpperCase()} (${opt.char})`,
+                cx,
+                cy - radius - 29,
+              );
             } else {
-              ctx.fillText(`Memilih Pilihan ${hoveredBoxIdx + 1}`, cx, cy - radius - 29);
+              ctx.fillText(
+                `Memilih Pilihan ${hoveredBoxIdx + 1}`,
+                cx,
+                cy - radius - 29,
+              );
             }
 
             // Draw recognized emoji inside palm ring
@@ -451,7 +504,8 @@ export default function QuizDetail() {
   }
 
   // Calculate stats
-  const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
+  const accuracy =
+    totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
 
   return (
     <section className="pt-16 md:pt-14 pb-24 min-h-screen bg-secondary">
@@ -484,29 +538,47 @@ export default function QuizDetail() {
               <Award className="w-12 h-12 text-primary" />
             </div>
 
-            <h2 className="text-zinc-800 dark:text-white text-3xl font-extrabold tracking-tight mb-2">Kuis Selesai! 🎉</h2>
+            <h2 className="text-zinc-800 dark:text-white text-3xl font-extrabold tracking-tight mb-2">
+              Kuis Selesai! 🎉
+            </h2>
             <p className="text-zinc-500 dark:text-white/60 text-sm md:text-base max-w-md mx-auto mb-8">
-              Kamu telah menyelesaikan latihan tebak huruf kana sebanyak <strong>10 soal</strong>. Berikut adalah ringkasan hasil analisismu:
+              Kamu telah menyelesaikan latihan tebak huruf kana sebanyak{" "}
+              <strong>10 soal</strong>. Berikut adalah ringkasan hasil
+              analisismu:
             </p>
 
             {/* Results Grid */}
             <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">
               <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl">
-                <p className="text-zinc-500 dark:text-white/50 text-xs md:text-sm uppercase font-semibold tracking-wider">Benar / Soal</p>
-                <p className="text-2xl md:text-3xl font-black text-zinc-800 dark:text-white mt-1">{score} / 10</p>
+                <p className="text-zinc-500 dark:text-white/50 text-xs md:text-sm uppercase font-semibold tracking-wider">
+                  Benar / Soal
+                </p>
+                <p className="text-2xl md:text-3xl font-black text-zinc-800 dark:text-white mt-1">
+                  {score} / 10
+                </p>
               </div>
               <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl">
-                <p className="text-zinc-500 dark:text-white/50 text-xs md:text-sm uppercase font-semibold tracking-wider">Akurasi</p>
-                <p className="text-2xl md:text-3xl font-black text-emerald-500 mt-1">{accuracy}%</p>
+                <p className="text-zinc-500 dark:text-white/50 text-xs md:text-sm uppercase font-semibold tracking-wider">
+                  Akurasi
+                </p>
+                <p className="text-2xl md:text-3xl font-black text-emerald-500 mt-1">
+                  {accuracy}%
+                </p>
               </div>
             </div>
 
             {/* Motivational message */}
             <div className="bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-100 dark:border-white/5 p-5 rounded-2xl max-w-md mx-auto mb-10 text-zinc-700 dark:text-white/90 text-sm md:text-base font-semibold shadow-inner">
-              {accuracy === 100 && "Sempurna! Kamu luar biasa, semua jawaban benar! 🏆"}
-              {accuracy >= 80 && accuracy < 100 && "Sangat Hebat! Kamu menguasai huruf ini dengan luar biasa! ⭐"}
-              {accuracy >= 50 && accuracy < 80 && "Kerja Bagus! Tingkatkan terus latihanmu! 📈"}
-              {accuracy < 50 && "Jangan menyerah! Terus berlatih untuk mengasah kemampuanmu! 💪"}
+              {accuracy === 100 &&
+                "Sempurna! Kamu luar biasa, semua jawaban benar! 🏆"}
+              {accuracy >= 80 &&
+                accuracy < 100 &&
+                "Sangat Hebat! Kamu menguasai huruf ini dengan luar biasa! ⭐"}
+              {accuracy >= 50 &&
+                accuracy < 80 &&
+                "Kerja Bagus! Tingkatkan terus latihanmu! 📈"}
+              {accuracy < 50 &&
+                "Jangan menyerah! Terus berlatih untuk mengasah kemampuanmu! 💪"}
             </div>
 
             {/* Action Buttons */}
@@ -532,16 +604,24 @@ export default function QuizDetail() {
             {/* Dashboard Stat Tracker */}
             <div className="grid grid-cols-2 gap-4 mb-8 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
               <div className="text-center border-r border-zinc-200 dark:border-white/10">
-                <p className="text-zinc-500 dark:text-white/60 text-xs md:text-sm uppercase tracking-wide font-medium">Skor Benar</p>
-                <p className="text-xl md:text-2xl font-bold text-zinc-800 dark:text-white mt-1">{score}</p>
+                <p className="text-zinc-500 dark:text-white/60 text-xs md:text-sm uppercase tracking-wide font-medium">
+                  Skor Benar
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-zinc-800 dark:text-white mt-1">
+                  {score}
+                </p>
               </div>
               {/* <div className="text-center border-r border-zinc-200 dark:border-white/10">
                 <p className="text-zinc-500 dark:text-white/60 text-xs md:text-sm uppercase tracking-wide font-medium">Kemajuan</p>
                 <p className="text-xl md:text-2xl font-bold text-primary mt-1">Soal {Math.min(totalAnswered + (isAnswered ? 0 : 1), 10)} / 10</p>
               </div> */}
               <div className="text-center">
-                <p className="text-zinc-500 dark:text-white/60 text-xs md:text-sm uppercase tracking-wide font-medium">Tipe Kuis</p>
-                <p className="text-xl md:text-2xl font-bold text-primary mt-1 uppercase">{type}</p>
+                <p className="text-zinc-500 dark:text-white/60 text-xs md:text-sm uppercase tracking-wide font-medium">
+                  Tipe Kuis
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-primary mt-1 uppercase">
+                  {type}
+                </p>
               </div>
             </div>
 
@@ -569,7 +649,9 @@ export default function QuizDetail() {
                   {!videoReady && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 text-white gap-4">
                       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-lg font-medium text-primary">Memulai Kamera & AI...</p>
+                      <p className="text-lg font-medium text-primary">
+                        Memulai Kamera & AI...
+                      </p>
                     </div>
                   )}
 
@@ -577,7 +659,9 @@ export default function QuizDetail() {
                   {videoReady && (
                     <div className="absolute top-4 left-4 bg-zinc-950/90 text-white px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-md flex items-center gap-2 text-xs">
                       <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
-                      <span>AI Tracking Aktif (Jari Terdeteksi: {fingerCount})</span>
+                      <span>
+                        AI Tracking Aktif (Jari Terdeteksi: {fingerCount})
+                      </span>
                     </div>
                   )}
                 </div>
@@ -586,29 +670,56 @@ export default function QuizDetail() {
                 <div className="bg-primary/5 border border-primary/10 p-4 rounded-xl flex gap-3 text-sm text-zinc-700 dark:text-zinc-300">
                   <HelpCircle className="w-5 h-5 text-primary shrink-0" />
                   <p>
-                    <strong>Cara Memilih Jawaban (AI Hand Gestures):</strong> Tunjukkan jumlah jari di depan kamera untuk memilih pilihan. Angkat <strong>1 jari</strong> untuk Pilihan 1, <strong>2 jari</strong> untuk Pilihan 2, <strong>3 jari</strong> untuk Pilihan 3, dan <strong>4 jari (atau lebih)</strong> untuk Pilihan 4. Tahan selama <strong>1 detik</strong> untuk mengonfirmasi! Anda juga bisa mengklik langsung pilihan di kanan.
+                    <strong>Cara Memilih Jawaban (AI Hand Gestures):</strong>{" "}
+                    Tunjukkan jumlah jari di depan kamera untuk memilih pilihan.
+                    Angkat <strong>1 jari</strong> untuk Pilihan 1,{" "}
+                    <strong>2 jari</strong> untuk Pilihan 2,{" "}
+                    <strong>3 jari</strong> untuk Pilihan 3, dan{" "}
+                    <strong>4 jari (atau lebih)</strong> untuk Pilihan 4. Tahan
+                    selama <strong>1 detik</strong> untuk mengonfirmasi! Anda
+                    juga bisa mengklik langsung pilihan di kanan.
                   </p>
                 </div>
 
                 {/* Answer Feedback Alert Banner */}
                 {isAnswered && (
-                  <div className={`p-6 rounded-2xl shadow-xl flex flex-col gap-4 border transition-all ${
-                    isCorrect 
-                      ? "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
-                      : "bg-red-50 dark:bg-red-950/80 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300"
-                  }`}>
+                  <div
+                    className={`p-6 rounded-2xl shadow-xl flex flex-col gap-4 border transition-all ${
+                      isCorrect
+                        ? "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
+                        : "bg-red-50 dark:bg-red-950/80 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300"
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        isCorrect ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
-                      }`}>
-                        {isCorrect ? <Award className="w-6 h-6" /> : <X className="w-6 h-6" />}
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          isCorrect
+                            ? "bg-emerald-500/20 text-emerald-500"
+                            : "bg-red-500/20 text-red-500"
+                        }`}
+                      >
+                        {isCorrect ? (
+                          <Award className="w-6 h-6" />
+                        ) : (
+                          <X className="w-6 h-6" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-bold text-lg">
-                          {isCorrect ? "Jawaban Anda Benar!" : "Jawaban Anda Kurang Tepat!"}
+                          {isCorrect
+                            ? "Jawaban Anda Benar!"
+                            : "Jawaban Anda Kurang Tepat!"}
                         </h3>
                         <p className="text-sm opacity-80 mt-0.5">
-                          Huruf <strong className="text-zinc-800 dark:text-white">{question.correctHuruf.char}</strong> dibaca <strong className="text-zinc-800 dark:text-white">{question.correctHuruf.romaji.toUpperCase()}</strong>.
+                          Huruf{" "}
+                          <strong className="text-zinc-800 dark:text-white">
+                            {question.correctHuruf.char}
+                          </strong>{" "}
+                          dibaca{" "}
+                          <strong className="text-zinc-800 dark:text-white">
+                            {question.correctHuruf.romaji.toUpperCase()}
+                          </strong>
+                          .
                         </p>
                       </div>
                     </div>
@@ -624,8 +735,8 @@ export default function QuizDetail() {
                       className="w-full bg-primary hover:brightness-110 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
                     >
                       <span>
-                        {totalAnswered >= 10 
-                          ? `Lihat Hasil Kuis ${autoNextCountdown !== null ? `(${autoNextCountdown}s)` : ""}` 
+                        {totalAnswered >= 10
+                          ? `Lihat Hasil Kuis ${autoNextCountdown !== null ? `(${autoNextCountdown}s)` : ""}`
                           : `Pertanyaan Berikutnya ${autoNextCountdown !== null ? `(${autoNextCountdown}s)` : ""}`}
                       </span>
                       <ChevronRight className="w-5 h-5" />
@@ -637,15 +748,17 @@ export default function QuizDetail() {
               {/* QUESTION PANEL & HTML CHOICES GRID (Right Col) */}
               <div className="lg:col-span-5 flex flex-col gap-6">
                 {/* Question Card */}
-                <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl p-8 text-center shadow-md relative overflow-hidden">
+                <div className="bg-white dark:bg-zinc-950 border-t-4 border-primary dark:border-white/10 rounded-2xl p-8 text-center shadow-md relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
-                  
+
                   <span className="bg-primary/10 text-primary text-xs px-3 py-1.5 rounded-full font-semibold border border-primary/20 uppercase tracking-wide">
                     Pertanyaan
                   </span>
-                  
-                  <h2 className="text-zinc-500 dark:text-white/60 text-sm font-medium mt-4">Bagaimana cara membaca huruf ini?</h2>
-                  
+
+                  <h2 className="text-zinc-500 dark:text-white/60 text-sm font-medium mt-4">
+                    Bagaimana cara membaca huruf ini?
+                  </h2>
+
                   <div className="text-8xl md:text-9xl font-bold text-zinc-800 dark:text-white my-6 select-none animate-pulse">
                     {question.correctHuruf.char}
                   </div>
@@ -656,21 +769,26 @@ export default function QuizDetail() {
                   {question.options.map((opt, idx) => {
                     const isSelected = userAnswerIndex === idx;
                     const isCorrectAnswer = question.correctIndex === idx;
-                    
+
                     // Set initial card states
-                    let btnStyle = "bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white shadow-sm";
+                    let btnStyle =
+                      "bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white shadow-sm";
 
                     if (hoveredIndex === idx && !isAnswered) {
-                      btnStyle = "bg-zinc-50 dark:bg-zinc-800 border-primary text-zinc-950 dark:text-white shadow-[0_0_15px_rgba(188,0,45,0.2)] scale-[1.02]";
+                      btnStyle =
+                        "bg-zinc-50 dark:bg-zinc-800 border-primary text-zinc-950 dark:text-white shadow-[0_0_15px_rgba(188,0,45,0.2)] scale-[1.02]";
                     }
 
                     if (isAnswered) {
                       if (isCorrectAnswer) {
-                        btnStyle = "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.1)]";
+                        btnStyle =
+                          "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.1)]";
                       } else if (isSelected) {
-                        btnStyle = "bg-red-500/10 border-red-500 text-red-600 dark:text-red-400 font-bold shadow-[0_0_15px_rgba(239,68,68,0.1)]";
+                        btnStyle =
+                          "bg-red-500/10 border-red-500 text-red-600 dark:text-red-400 font-bold shadow-[0_0_15px_rgba(239,68,68,0.1)]";
                       } else {
-                        btnStyle = "bg-zinc-100/50 dark:bg-zinc-900/20 border-zinc-100 dark:border-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed";
+                        btnStyle =
+                          "bg-zinc-100/50 dark:bg-zinc-900/20 border-zinc-100 dark:border-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed";
                       }
                     }
 
@@ -703,7 +821,7 @@ export default function QuizDetail() {
 
                         {/* Progress Bar overlay for gesture selection */}
                         {!isAnswered && hoveredIndex === idx && (
-                          <div 
+                          <div
                             className="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-primary to-primary/80 transition-all duration-75"
                             style={{ width: `${hoverProgress * 100}%` }}
                           />

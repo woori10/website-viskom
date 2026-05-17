@@ -3,7 +3,14 @@
 import Container from "@/component/ui/Container";
 import { useCamera } from "@/hooks/useCamera";
 import { Huruf, hurufList } from "@/lib/data/huruf";
-import { ArrowLeft, ArrowRight, Camera, Check, RotateCcw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Camera,
+  Check,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -230,29 +237,151 @@ const KATAKANA_LABELS_FIXED = [
 ];
 
 const HIRAGANA_CLASSES = [
-  "あ", "い", "う", "え", "お",
-  "か", "が", "き", "ぎ", "く", "ぐ", "け", "げ", "こ", "ご",
-  "さ", "ざ", "し", "じ", "す", "ず", "せ", "ぜ", "そ", "ぞ",
-  "た", "だ", "ち", "ぢ", "つ", "づ", "て", "で", "と", "ど",
-  "な", "に", "ぬ", "ね", "の",
-  "は", "ば", "ぱ", "ひ", "び", "ぴ", "ふ", "ぶ", "ぷ", "へ", "べ", "ぺ", "ほ", "ぼ", "ぽ",
-  "ま", "み", "む", "め", "も",
-  "や", "ゆ", "よ",
-  "ら", "り", "る", "れ", "ろ",
-  "わ", "を", "ん"
+  "あ",
+  "い",
+  "う",
+  "え",
+  "お",
+  "か",
+  "が",
+  "き",
+  "ぎ",
+  "く",
+  "ぐ",
+  "け",
+  "げ",
+  "こ",
+  "ご",
+  "さ",
+  "ざ",
+  "し",
+  "じ",
+  "す",
+  "ず",
+  "せ",
+  "ぜ",
+  "そ",
+  "ぞ",
+  "た",
+  "だ",
+  "ち",
+  "ぢ",
+  "つ",
+  "づ",
+  "て",
+  "で",
+  "と",
+  "ど",
+  "な",
+  "に",
+  "ぬ",
+  "ね",
+  "の",
+  "は",
+  "ば",
+  "ぱ",
+  "ひ",
+  "び",
+  "ぴ",
+  "ふ",
+  "ぶ",
+  "ぷ",
+  "へ",
+  "べ",
+  "ぺ",
+  "ほ",
+  "ぼ",
+  "ぽ",
+  "ま",
+  "み",
+  "む",
+  "め",
+  "も",
+  "や",
+  "ゆ",
+  "よ",
+  "ら",
+  "り",
+  "る",
+  "れ",
+  "ろ",
+  "わ",
+  "を",
+  "ん",
 ];
 
 const KATAKANA_CLASSES = [
-  "ア", "イ", "ウ", "エ", "オ",
-  "カ", "ガ", "キ", "ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ",
-  "サ", "ザ", "シ", "ジ", "ス", "ズ", "セ", "ゼ", "ソ", "ゾ",
-  "タ", "ダ", "チ", "ヂ", "ツ", "ヅ", "テ", "デ", "ト", "ド",
-  "ナ", "ニ", "ヌ", "ネ", "ノ",
-  "ハ", "バ", "パ", "ヒ", "ビ", "ピ", "フ", "ブ", "プ", "ヘ", "ベ", "ペ", "ホ", "ボ", "ポ",
-  "マ", "ミ", "ム", "メ", "モ",
-  "ヤ", "ユ", "ヨ",
-  "ラ", "リ", "ル", "レ", "ロ",
-  "ワ", "ヲ", "ン"
+  "ア",
+  "イ",
+  "ウ",
+  "エ",
+  "オ",
+  "カ",
+  "ガ",
+  "キ",
+  "ギ",
+  "ク",
+  "グ",
+  "ケ",
+  "ゲ",
+  "コ",
+  "ゴ",
+  "サ",
+  "ザ",
+  "シ",
+  "ジ",
+  "ス",
+  "ズ",
+  "セ",
+  "ゼ",
+  "ソ",
+  "ゾ",
+  "タ",
+  "ダ",
+  "チ",
+  "ヂ",
+  "ツ",
+  "ヅ",
+  "テ",
+  "デ",
+  "ト",
+  "ド",
+  "ナ",
+  "ニ",
+  "ヌ",
+  "ネ",
+  "ノ",
+  "ハ",
+  "バ",
+  "パ",
+  "ヒ",
+  "ビ",
+  "ピ",
+  "フ",
+  "ブ",
+  "プ",
+  "ヘ",
+  "ベ",
+  "ペ",
+  "ホ",
+  "ボ",
+  "ポ",
+  "マ",
+  "ミ",
+  "ム",
+  "メ",
+  "モ",
+  "ヤ",
+  "ユ",
+  "ヨ",
+  "ラ",
+  "リ",
+  "ル",
+  "レ",
+  "ロ",
+  "ワ",
+  "ヲ",
+  "ン",
 ];
 
 // Types for landmarks
@@ -357,13 +486,15 @@ export default function WritingPractice() {
         const loadedModel = await tf.loadGraphModel(modelUrl);
         if (isMounted) {
           modelRef.current = loadedModel;
-          console.log(`✅ Client-side TF.js ${type} model loaded successfully!`);
+          console.log(
+            `✅ Client-side TF.js ${type} model loaded successfully!`,
+          );
         }
       } catch (err: any) {
         console.error("❌ Failed to load TFJS model:", err);
         if (isMounted) {
           setModelError(
-            `Gagal memuat model AI lokal: ${err.message || err}. Pastikan folder public/models/${type.toLowerCase()} berisi model yang valid.`
+            `Gagal memuat model AI lokal: ${err.message || err}. Pastikan folder public/models/${type.toLowerCase()} berisi model yang valid.`,
           );
         }
       } finally {
@@ -391,7 +522,7 @@ export default function WritingPractice() {
     if (!drawingCanvas) return;
     const dctx = drawingCanvas.getContext("2d");
     if (!dctx) return;
-    
+
     dctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     dctx.shadowColor = "#F5D061";
     dctx.shadowBlur = 15;
@@ -597,7 +728,8 @@ export default function WritingPractice() {
       img.src = base64Data;
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
-        img.onerror = (e) => reject(new Error("Gagal memuat gambar untuk prediksi."));
+        img.onerror = (e) =>
+          reject(new Error("Gagal memuat gambar untuk prediksi."));
       });
 
       // Wrap inside tf.tidy to automatically clean up WebGL tensors
@@ -625,12 +757,15 @@ export default function WritingPractice() {
 
         return {
           predictionsData: predictions.dataSync(),
-          bestIdx: argMaxTensor.dataSync()[0]
+          bestIdx: argMaxTensor.dataSync()[0],
         };
       });
 
       // Determine model class labels based on current practice type
-      const classes = type?.toLowerCase() === "hiragana" ? HIRAGANA_CLASSES : KATAKANA_CLASSES;
+      const classes =
+        type?.toLowerCase() === "hiragana"
+          ? HIRAGANA_CLASSES
+          : KATAKANA_CLASSES;
 
       const bestChar = classes[result.bestIdx];
       const bestConf = result.predictionsData[result.bestIdx];
@@ -639,9 +774,10 @@ export default function WritingPractice() {
       setPrediction(bestChar);
       setIsCorrect(bestChar === currentHuruf.char);
 
-      console.log(`✅ [TF.js Client-Side] Prediction: ${bestChar} (${bestConfPercentage})`);
+      console.log(
+        `✅ [TF.js Client-Side] Prediction: ${bestChar} (${bestConfPercentage})`,
+      );
       console.log(`🎯 Target (${currentHuruf.char})`);
-
     } catch (err: any) {
       console.error("Prediction error:", err);
       setModelError(`Error Prediksi: ${err.message || err}`);
@@ -972,14 +1108,11 @@ export default function WritingPractice() {
         <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-white/80 hover:text-zinc-900 dark:hover:text-white transition-all px-4 py-2 rounded-xl cursor-pointer"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5" />
+            <span>Kembali ke Practice</span>
           </button>
-
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center">
-            Latihan Menulis {type === "hiragana" ? "Hiragana" : "Katakana"}
-          </h1>
 
           <div className="w-10" />
         </div>
@@ -1035,7 +1168,7 @@ export default function WritingPractice() {
                 <Check className="w-5 h-5" />
                 Simpan & Prediksi
               </button>
-              
+
               <button
                 onClick={handleReset}
                 className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"

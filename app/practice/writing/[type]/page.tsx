@@ -3,8 +3,7 @@
 import Container from "@/component/ui/Container";
 import { useCamera } from "@/hooks/useCamera";
 import { Huruf, hurufList } from "@/lib/data/huruf";
-import * as tf from "@tensorflow/tfjs";
-import { ArrowLeft, Camera, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, Check, RotateCcw, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -241,11 +240,15 @@ export default function WritingPractice() {
   const router = useRouter();
 
   const [huruf, setHuruf] = useState<Huruf | null>(null);
+  const hurufRef = useRef<Huruf | null>(null);
+
+  useEffect(() => {
+    hurufRef.current = huruf;
+  }, [huruf]);
   const [videoReady, setVideoReady] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isWriting, setIsWriting] = useState(false);
   const [prediction, setPrediction] = useState<string | null>(null);
-  const [model, setModel] = useState<tf.GraphModel | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isPredicting, setIsPredicting] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(true);
@@ -257,7 +260,7 @@ export default function WritingPractice() {
   const [strokes, setStrokes] = useState<Point[][]>([]);
 
   // RANDOM HURUF
-  useEffect(() => {
+  const loadRandomHuruf = () => {
     const filtered = hurufList.filter(
       (h) => h.type.toLowerCase() === type?.toLowerCase(),
     );
@@ -266,28 +269,47 @@ export default function WritingPractice() {
       const random = filtered[Math.floor(Math.random() * filtered.length)];
       setHuruf(random);
     }
+    // Safely reset states if handleReset is defined, or clear manually
+    if (typeof handleReset === "function") {
+      handleReset();
+    } else {
+      strokesRef.current = [];
+      currentStrokeRef.current = [];
+      setStrokes([]);
+      setPrediction(null);
+      setIsCorrect(null);
+    }
+  };
+
+  useEffect(() => {
+    loadRandomHuruf();
   }, [type]);
 
-  // LOAD MODEL
+  // CHECK BACKEND HEALTH
   useEffect(() => {
-    async function loadModel() {
+    async function checkBackendHealth() {
       setIsModelLoading(true);
       setModelError(null);
       try {
-        const modelUrl = `/models/${type}/model.json`;
-        console.log("Loading model from:", modelUrl);
-        const loadedModel = await tf.loadGraphModel(modelUrl);
-        setModel(loadedModel);
-        console.log("✅ Model loaded successfully");
+        const response = await fetch("http://localhost:5000/health");
+        const data = await response.json();
+        if (data.status === "healthy") {
+          console.log("✅ Local AI backend is healthy and models loaded");
+        } else {
+          console.error("❌ Local AI backend is unhealthy:", data.error);
+          setModelError("Layanan AI backend tidak sehat. Periksa logs server.");
+        }
       } catch (err) {
-        console.error("❌ Failed to load model:", err);
-        setModelError("Gagal memuat model AI. Pastikan file model tersedia.");
+        console.error("❌ Failed to connect to local AI API:", err);
+        setModelError(
+          "Gagal terhubung ke API backend lokal (port 5000). Pastikan Flask server menyala."
+        );
       } finally {
         setIsModelLoading(false);
       }
     }
     if (type) {
-      loadModel();
+      checkBackendHealth();
     }
   }, [type]);
 
@@ -295,6 +317,32 @@ export default function WritingPractice() {
   const strokesRef = useRef<Point[][]>([]);
   const currentStrokeRef = useRef<Point[]>([]);
   const isShiftPressedRef = useRef(false);
+  const isMouseDrawingRef = useRef(false);
+
+  const redrawDrawingCanvas = () => {
+    const drawingCanvas = drawingCanvasRef.current;
+    if (!drawingCanvas) return;
+    const dctx = drawingCanvas.getContext("2d");
+    if (!dctx) return;
+    
+    dctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    dctx.shadowColor = "#F5D061";
+    dctx.shadowBlur = 15;
+    dctx.strokeStyle = "#F5D061";
+    dctx.lineWidth = 6;
+    dctx.lineCap = "round";
+    dctx.lineJoin = "round";
+
+    [...strokesRef.current, currentStrokeRef.current].forEach((stroke) => {
+      if (stroke.length < 2) return;
+      dctx.beginPath();
+      dctx.moveTo(stroke[0].x, stroke[0].y);
+      for (let i = 1; i < stroke.length; i++) {
+        dctx.lineTo(stroke[i].x, stroke[i].y);
+      }
+      dctx.stroke();
+    });
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -318,6 +366,40 @@ export default function WritingPractice() {
     strokesRef.current = [];
     currentStrokeRef.current = [];
     setStrokes([]);
+    redrawDrawingCanvas();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 1280;
+    const y = ((e.clientY - rect.top) / rect.height) * 720;
+    isMouseDrawingRef.current = true;
+    currentStrokeRef.current = [{ x, y }];
+    redrawDrawingCanvas();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isMouseDrawingRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 1280;
+    const y = ((e.clientY - rect.top) / rect.height) * 720;
+    currentStrokeRef.current.push({ x, y });
+    redrawDrawingCanvas();
+  };
+
+  const handleMouseUp = () => {
+    if (!isMouseDrawingRef.current) return;
+    isMouseDrawingRef.current = false;
+    if (currentStrokeRef.current.length > 0) {
+      strokesRef.current.push([...currentStrokeRef.current]);
+      currentStrokeRef.current = [];
+      setStrokes([...strokesRef.current]);
+    }
+    redrawDrawingCanvas();
+  };
+
+  const handleMouseLeave = () => {
+    handleMouseUp();
   };
 
   const handleReset = () => {
@@ -327,13 +409,15 @@ export default function WritingPractice() {
     // The canvas will be cleared in the onResults loop
   };
 
-  const handlePredict = async () => {
-    if (!model || !huruf) {
-      console.warn("Prediction aborted: Model or target char not ready.");
+  const handlePredict = async (base64Image?: string) => {
+    const currentHuruf = hurufRef.current;
+    if (!currentHuruf) {
+      console.warn("Prediction aborted: Target char not ready.");
       return;
     }
 
     if (
+      !base64Image &&
       strokesRef.current.length === 0 &&
       currentStrokeRef.current.length === 0
     ) {
@@ -345,90 +429,88 @@ export default function WritingPractice() {
     console.log("🧠 Starting AI Prediction...");
 
     try {
-      // Create a dedicated high-contrast canvas for prediction (Black BG, White Strokes)
-      const predictCanvas = document.createElement("canvas");
-      predictCanvas.width = 224;
-      predictCanvas.height = 224;
-      const pctx = predictCanvas.getContext("2d");
-      if (!pctx) return;
+      let base64Data = base64Image;
 
-      // Fill black background
-      pctx.fillStyle = "#000000";
-      pctx.fillRect(0, 0, predictCanvas.width, predictCanvas.height);
+      // Fallback: If no base64Image is passed directly, reconstruct it from strokes
+      if (!base64Data) {
+        // Create a dedicated high-contrast canvas for prediction (Black BG, White Strokes)
+        const predictCanvas = document.createElement("canvas");
+        predictCanvas.width = 224;
+        predictCanvas.height = 224;
+        const pctx = predictCanvas.getContext("2d");
+        if (!pctx) return;
 
-      // Draw strokes in pure white
-      pctx.strokeStyle = "#ffffff";
-      pctx.lineWidth = 10;
-      pctx.lineCap = "round";
-      pctx.lineJoin = "round";
+        // Fill black background
+        pctx.fillStyle = "#000000";
+        pctx.fillRect(0, 0, predictCanvas.width, predictCanvas.height);
 
-      // Calculate bounding box to normalize/center the character
-      const allPoints = [
-        ...strokesRef.current,
-        currentStrokeRef.current,
-      ].flat();
-      if (allPoints.length < 2) return;
+        // Calculate bounding box to normalize/center the character
+        const allPoints = [
+          ...strokesRef.current,
+          currentStrokeRef.current,
+        ].flat();
+        if (allPoints.length < 2) return;
 
-      const minX = Math.min(...allPoints.map((p) => p.x));
-      const maxX = Math.max(...allPoints.map((p) => p.x));
-      const minY = Math.min(...allPoints.map((p) => p.y));
-      const maxY = Math.max(...allPoints.map((p) => p.y));
+        const minX = Math.min(...allPoints.map((p) => p.x));
+        const maxX = Math.max(...allPoints.map((p) => p.x));
+        const minY = Math.min(...allPoints.map((p) => p.y));
+        const maxY = Math.max(...allPoints.map((p) => p.y));
 
-      const width = maxX - minX;
-      const height = maxY - minY;
-      const size = Math.max(width, height) * 1.2; // Add some padding
+        const width = maxX - minX;
+        const height = maxY - minY;
+        const size = Math.max(width, height) * 1.25; // Add some padding
 
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
 
-      // Transform context to center the drawing
-      pctx.save();
-      pctx.translate(predictCanvas.width / 2, predictCanvas.height / 2);
-      pctx.scale(predictCanvas.width / size, predictCanvas.height / size);
-      pctx.translate(-centerX, -centerY);
+        // Transform context to center the drawing
+        pctx.save();
+        pctx.translate(predictCanvas.width / 2, predictCanvas.height / 2);
+        pctx.scale(predictCanvas.width / size, predictCanvas.height / size);
+        pctx.translate(-centerX, -centerY);
 
-      [...strokesRef.current, currentStrokeRef.current].forEach((stroke) => {
-        if (stroke.length < 2) return;
-        pctx.beginPath();
-        pctx.moveTo(stroke[0].x, stroke[0].y);
-        for (let i = 1; i < stroke.length; i++) {
-          pctx.lineTo(stroke[i].x, stroke[i].y);
-        }
-        pctx.stroke();
+        // Draw strokes in pure white with fixed stroke width (scaled inversely so that the stroke width on the final 224x224 canvas is ALWAYS exactly 14px!)
+        pctx.strokeStyle = "#ffffff";
+        pctx.lineWidth = 14 * (size / predictCanvas.width);
+        pctx.lineCap = "round";
+        pctx.lineJoin = "round";
+
+        [...strokesRef.current, currentStrokeRef.current].forEach((stroke) => {
+          if (stroke.length < 2) return;
+          pctx.beginPath();
+          pctx.moveTo(stroke[0].x, stroke[0].y);
+          for (let i = 1; i < stroke.length; i++) {
+            pctx.lineTo(stroke[i].x, stroke[i].y);
+          }
+          pctx.stroke();
+        });
+        pctx.restore();
+
+        // Extract base64 image data URL
+        base64Data = predictCanvas.toDataURL("image/png");
+      }
+
+      // Post to the local backend API running on port 5000
+      const response = await fetch(`http://localhost:5000/predict/${type?.toLowerCase()}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image: base64Data })
       });
-      pctx.restore();
 
-      // TF.js Inference
-      const tensor = tf.tidy(() => {
-        let t = tf.browser.fromPixels(predictCanvas);
-        t = t.toFloat().div(255.0);
-        return t.expandDims(0);
-      });
-
-      const output = model.predict(tensor) as tf.Tensor;
-      const data = await output.data();
-      const maxIdx = output.argMax(1).dataSync()[0];
-      const labels =
-        type?.toLowerCase() === "katakana"
-          ? KATAKANA_LABELS_FIXED
-          : HIRAGANA_LABELS;
-      const predictedChar = labels[maxIdx];
-
-      // Calculate percentages
-      const confidence = data[maxIdx] * 100;
-      const targetIdx = labels.indexOf(huruf.char);
-      const targetConfidence = targetIdx !== -1 ? data[targetIdx] * 100 : 0;
-
-      console.log(
-        `✅ Prediction: ${predictedChar} (${confidence.toFixed(2)}%)`,
-      );
-      console.log(`🎯 Target (${huruf.char}): ${targetConfidence.toFixed(2)}%`);
-
-      setPrediction(predictedChar);
-      setIsCorrect(predictedChar === huruf.char);
-
-      tensor.dispose();
-      output.dispose();
+      const data = await response.json();
+      if (data.success) {
+        setPrediction(data.prediction);
+        setIsCorrect(data.prediction === currentHuruf.char);
+        
+        console.log(
+          `✅ Prediction: ${data.prediction} (${data.confidence_percentage})`,
+        );
+        console.log(`🎯 Target (${currentHuruf.char})`);
+      } else {
+        console.error("Prediction Error:", data.error);
+      }
     } catch (err) {
       console.error("Prediction error:", err);
     } finally {
@@ -469,8 +551,9 @@ export default function WritingPractice() {
       sctx.stroke();
     });
 
-    setCapturedImage(saveCanvas.toDataURL("image/png"));
-    handlePredict();
+    const imgDataUrl = saveCanvas.toDataURL("image/png");
+    setCapturedImage(imgDataUrl);
+    handlePredict(imgDataUrl);
     handleClearCanvas();
   };
 
@@ -773,13 +856,20 @@ export default function WritingPractice() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* CAMERA SECTION */}
           <div className="lg:col-span-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video border-4 border-white">
+            <div
+              className="relative rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video border-4 border-white cursor-crosshair select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+            >
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
                 onLoadedMetadata={() => setVideoReady(true)}
+                draggable="false"
                 className="w-full h-full object-cover scale-x-[-1]"
               />
 
@@ -802,6 +892,33 @@ export default function WritingPractice() {
                   <p className="text-lg font-medium">Memulai Kamera...</p>
                 </div>
               )}
+            </div>
+
+            {/* HTML CONTROL BUTTONS */}
+            <div className="mt-4 flex flex-wrap gap-4">
+              <button
+                onClick={handleSave}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Check className="w-5 h-5" />
+                Simpan & Prediksi
+              </button>
+              
+              <button
+                onClick={handleReset}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Bersihkan Canvas
+              </button>
+
+              <button
+                onClick={loadRandomHuruf}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ArrowRight className="w-5 h-5" />
+                Karakter Baru
+              </button>
             </div>
 
             {/* INFO */}

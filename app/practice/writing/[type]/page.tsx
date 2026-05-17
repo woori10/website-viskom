@@ -229,6 +229,32 @@ const KATAKANA_LABELS_FIXED = [
   "ポ",
 ];
 
+const HIRAGANA_CLASSES = [
+  "あ", "い", "う", "え", "お",
+  "か", "が", "き", "ぎ", "く", "ぐ", "け", "げ", "こ", "ご",
+  "さ", "ざ", "し", "じ", "す", "ず", "せ", "ぜ", "そ", "ぞ",
+  "た", "だ", "ち", "ぢ", "つ", "づ", "て", "で", "と", "ど",
+  "な", "に", "ぬ", "ね", "の",
+  "は", "ば", "ぱ", "ひ", "び", "ぴ", "ふ", "ぶ", "ぷ", "へ", "べ", "ぺ", "ほ", "ぼ", "ぽ",
+  "ま", "み", "む", "め", "も",
+  "や", "ゆ", "よ",
+  "ら", "り", "る", "れ", "ろ",
+  "わ", "を", "ん"
+];
+
+const KATAKANA_CLASSES = [
+  "ア", "イ", "ウ", "エ", "オ",
+  "カ", "ガ", "キ", "ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ",
+  "サ", "ザ", "シ", "ジ", "ス", "ズ", "セ", "ゼ", "ソ", "ゾ",
+  "タ", "ダ", "チ", "ヂ", "ツ", "ヅ", "テ", "デ", "ト", "ド",
+  "ナ", "ニ", "ヌ", "ネ", "ノ",
+  "ハ", "バ", "パ", "ヒ", "ビ", "ピ", "フ", "ブ", "プ", "ヘ", "ベ", "ペ", "ホ", "ボ", "ポ",
+  "マ", "ミ", "ム", "メ", "モ",
+  "ヤ", "ユ", "ヨ",
+  "ラ", "リ", "ル", "レ", "ロ",
+  "ワ", "ヲ", "ン"
+];
+
 // Types for landmarks
 type Point = { x: number; y: number };
 
@@ -257,6 +283,7 @@ export default function WritingPractice() {
   const videoRef = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const modelRef = useRef<any>(null);
   const [strokes, setStrokes] = useState<Point[][]>([]);
 
   // RANDOM HURUF
@@ -285,7 +312,8 @@ export default function WritingPractice() {
     loadRandomHuruf();
   }, [type]);
 
-  // CHECK BACKEND HEALTH
+  // CHECK BACKEND HEALTH (DI-KOMENKAN)
+  /*
   useEffect(() => {
     async function checkBackendHealth() {
       setIsModelLoading(true);
@@ -311,6 +339,45 @@ export default function WritingPractice() {
     if (type) {
       checkBackendHealth();
     }
+  }, [type]);
+  */
+
+  // LOAD LOCAL MODEL IN BROWSER WITH TENSORFLOW.JS
+  useEffect(() => {
+    let isMounted = true;
+    async function loadLocalModel() {
+      if (!type) return;
+      setIsModelLoading(true);
+      setModelError(null);
+      try {
+        console.log("⏳ Loading local TensorFlow.js model...");
+        const tf = await import("@tensorflow/tfjs");
+        await tf.ready();
+        const modelUrl = `/models/${type.toLowerCase()}/model.json`;
+        const loadedModel = await tf.loadGraphModel(modelUrl);
+        if (isMounted) {
+          modelRef.current = loadedModel;
+          console.log(`✅ Client-side TF.js ${type} model loaded successfully!`);
+        }
+      } catch (err: any) {
+        console.error("❌ Failed to load TFJS model:", err);
+        if (isMounted) {
+          setModelError(
+            `Gagal memuat model AI lokal: ${err.message || err}. Pastikan folder public/models/${type.toLowerCase()} berisi model yang valid.`
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsModelLoading(false);
+        }
+      }
+    }
+
+    loadLocalModel();
+
+    return () => {
+      isMounted = false;
+    };
   }, [type]);
 
   // HAND TRACKING AND DRAWING LOGIC
@@ -490,6 +557,9 @@ export default function WritingPractice() {
         base64Data = predictCanvas.toDataURL("image/png");
       }
 
+      /* ========================================================
+       * KODE ASLI API (DI-KOMENKAN):
+       * ========================================================
       // Post to the local backend API running on port 5000
       const response = await fetch(`http://localhost:5000/predict/${type?.toLowerCase()}`, {
         method: "POST",
@@ -511,8 +581,70 @@ export default function WritingPractice() {
       } else {
         console.error("Prediction Error:", data.error);
       }
-    } catch (err) {
+       * ======================================================== */
+
+      // ========================================================
+      // PREDIKSI LOKAL DENGAN TENSORFLOW.JS & MODEL LOKAL
+      // ========================================================
+      if (!modelRef.current) {
+        throw new Error("Model belum siap atau gagal dimuat.");
+      }
+
+      const tf = await import("@tensorflow/tfjs");
+
+      // Load image base64 into HTMLImageElement
+      const img = new Image();
+      img.src = base64Data;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = (e) => reject(new Error("Gagal memuat gambar untuk prediksi."));
+      });
+
+      // Wrap inside tf.tidy to automatically clean up WebGL tensors
+      const result = tf.tidy(() => {
+        // Convert image to a tensor: [height, width, channels] (RGB)
+        const imgTensor = tf.browser.fromPixels(img);
+
+        // Resize image to [224, 224] to match MobileNetV2 inputs
+        const resizedImg = tf.image.resizeBilinear(imgTensor, [224, 224]);
+
+        // Normalize image values to range [-1, 1] (preprocess_input MobileNetV2: (x / 127.5) - 1.0)
+        const normalizedImg = tf.sub(tf.div(resizedImg, 127.5), 1.0);
+
+        // Add batch dimension: [1, 224, 224, 3]
+        const batchedImg = tf.expandDims(normalizedImg, 0);
+
+        // Predict
+        const predictionTensor = modelRef.current.predict(batchedImg) as any;
+
+        // Get softmax/output values as a 1D tensor
+        const predictions = predictionTensor.squeeze();
+
+        // Get index of highest confidence value
+        const argMaxTensor = predictions.argMax();
+
+        return {
+          predictionsData: predictions.dataSync(),
+          bestIdx: argMaxTensor.dataSync()[0]
+        };
+      });
+
+      // Determine model class labels based on current practice type
+      const classes = type?.toLowerCase() === "hiragana" ? HIRAGANA_CLASSES : KATAKANA_CLASSES;
+
+      const bestChar = classes[result.bestIdx];
+      const bestConf = result.predictionsData[result.bestIdx];
+      const bestConfPercentage = `${(bestConf * 100).toFixed(2)}%`;
+
+      setPrediction(bestChar);
+      setIsCorrect(bestChar === currentHuruf.char);
+
+      console.log(`✅ [TF.js Client-Side] Prediction: ${bestChar} (${bestConfPercentage})`);
+      console.log(`🎯 Target (${currentHuruf.char})`);
+
+    } catch (err: any) {
       console.error("Prediction error:", err);
+      setModelError(`Error Prediksi: ${err.message || err}`);
     } finally {
       setIsPredicting(false);
     }
